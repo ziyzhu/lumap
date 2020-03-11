@@ -11,15 +11,10 @@
     "module": "esnext",
     "moduleResolution": "node",
     "isolatedModules": true,
-    "noEmit": true
+    "noEmit": true,
+    "noImplicitAny": false,
+    "noUnusedLocals": false
   },
-  "include": [
-    "./**/*.ts",
-    "./**/*.tsx"
-  ],
-  "exclude": [
-    "lib",
-    "node_modules",
-    "test"
-  ]
+  "include": ["./**/*.ts", "./**/*.tsx"],
+  "exclude": ["lib", "node_modules", "test"]
 }

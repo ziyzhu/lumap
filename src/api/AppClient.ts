@@ -2,7 +2,8 @@ import {Logger, LogLevel} from '@bentley/bentleyjs-core';
 import {OidcFrontendClientConfiguration, IOidcFrontendClient, Config, UrlDiscoveryClient} from '@bentley/imodeljs-clients';
 import {IModelApp, OidcBrowserClient, FrontendRequestContext} from '@bentley/imodeljs-frontend';
 import {BentleyCloudRpcManager, BentleyCloudRpcParams} from '@bentley/imodeljs-common';
-import {RpcInterfaceDefinition, IModelReadRpcInterface, IModelTileRpcInterface} from '@bentley/imodeljs-common';
+import {RpcInterfaceDefinition, IModelReadRpcInterface, IModelTileRpcInterface, SnapshotIModelRpcInterface} from '@bentley/imodeljs-common';
+import {PresentationRpcInterface} from '@bentley/presentation-common';
 import {Presentation} from '@bentley/presentation-frontend';
 import {UiComponents} from '@bentley/ui-components';
 
@@ -10,7 +11,7 @@ import {UiComponents} from '@bentley/ui-components';
  ** Returns a list of RPCs supported by this application
  **/
 export function getSupportedRpcs(): RpcInterfaceDefinition[] {
-  return [IModelReadRpcInterface, IModelTileRpcInterface];
+  return [IModelReadRpcInterface, IModelTileRpcInterface, PresentationRpcInterface, SnapshotIModelRpcInterface];
 }
 
 // Boiler plate code

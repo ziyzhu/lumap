@@ -10,6 +10,8 @@ import {AppClient} from '../api/AppClient';
 import {SimpleViewportComponent} from '../components/Viewport';
 import Toolbar from '../components/Toolbar';
 import {SignIn} from '@bentley/ui-components';
+import SideMenu from '../components/SideMenu';
+import {BuildingMapper} from '../api/mapper';
 
 // initialize logging to the console
 Logger.initializeToConsole();
@@ -39,6 +41,11 @@ export default class IModelPage extends React.Component<{}, IState> {
       viewDefinitionId: undefined,
       imodel: undefined,
     };
+    IModelApp.viewManager.onViewOpen.addOnce(vp => {
+      const viewFlags = vp.viewFlags.clone();
+      viewFlags.shadows = false;
+      vp.viewFlags = viewFlags;
+    });
   }
 
   public componentDidMount() {
@@ -155,8 +162,7 @@ export default class IModelPage extends React.Component<{}, IState> {
   }
 
   private _onStartSignin = async () => {
-    this.setState(prev => ({user: {...prev.user, isLoading: true}}));
-    await AppClient.oidcClient.signIn(new FrontendRequestContext());
+    this.setState(prev => ({user: {...prev.user, isLoading: true}}), () => AppClient.oidcClient.signIn(new FrontendRequestContext()));
   };
 
   private _onUserStateChanged = (accessToken: AccessToken | undefined) => {
@@ -178,6 +184,7 @@ export default class IModelPage extends React.Component<{}, IState> {
         <>
           <SimpleViewportComponent rulesetId={rulesetId} imodel={this.state.imodel} viewDefinitionId={this.state.viewDefinitionId} />
           <Toolbar />
+          <SideMenu />
         </>
       );
     } else {
