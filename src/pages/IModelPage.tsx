@@ -10,7 +10,7 @@ import {AppClient} from '../api/AppClient';
 import {SimpleViewportComponent} from '../components/Viewport';
 import Toolbar from '../components/Toolbar';
 import {SignIn} from '@bentley/ui-components';
-import SideMenu from '../components/SideMenu';
+import DrawerComponent from '../components/DrawerComponent';
 import {BuildingMapper} from '../api/mapper';
 
 // initialize logging to the console
@@ -184,7 +184,7 @@ export default class IModelPage extends React.Component<{}, IState> {
         <>
           <SimpleViewportComponent rulesetId={rulesetId} imodel={this.state.imodel} viewDefinitionId={this.state.viewDefinitionId} />
           <Toolbar />
-          <SideMenu />
+          <DrawerComponent />
         </>
       );
     } else {
