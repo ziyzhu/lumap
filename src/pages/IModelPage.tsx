@@ -12,6 +12,7 @@ import Toolbar from '../components/Toolbar';
 import {SignIn} from '@bentley/ui-components';
 import DrawerComponent from '../components/DrawerComponent';
 import {BuildingMapper} from '../api/mapper';
+import {ActionType, EmphasizeElementManager} from '../api/EmphasizeElementManager';
 
 // initialize logging to the console
 Logger.initializeToConsole();
@@ -133,7 +134,8 @@ export default class IModelPage extends React.Component<{}, IState> {
         // log all selected ECInstance ids grouped by ECClass name
         console.log('ECInstances:');
         selection.instanceKeys.forEach((ids, ecclass) => {
-          console.log(`${ecclass}: [${[...ids].join(',')}]`);
+          console.log(`${ecclass}: ${[...ids].join(',')}`);
+          EmphasizeElementManager.runAction(ActionType.Override);
         });
       }
       if (selection.nodeKeys.size !== 0) {

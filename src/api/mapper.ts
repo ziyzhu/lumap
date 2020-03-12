@@ -1,4 +1,5 @@
 import * as FrozenSharkMeterData from './PI_Shark_Meter_Frozen_Data.json';
+import {EmphasizeElementManager} from './EmphasizeElementManager';
 
 interface IDynamicValue {
   value: string;
