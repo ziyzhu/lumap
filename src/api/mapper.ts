@@ -7,11 +7,11 @@ interface IDynamicValue {
   good: boolean;
 }
 
-interface IGenericDataObject {
+interface IGenericData {
   objectId: string;
 }
 
-interface IBuildingDataObject extends IGenericDataObject {
+export interface IBuildingData extends IGenericData {
   yearBuilt: IDynamicValue;
   monthlyAverageWatts: IDynamicValue;
   longitude: IDynamicValue;
@@ -26,15 +26,15 @@ interface IBuildingDataObject extends IGenericDataObject {
 }
 
 class GenericDataObject {
-  data: IGenericDataObject;
-  constructor(data: IGenericDataObject) {
+  data: IGenericData;
+  constructor(data: IGenericData) {
     this.data = data;
   }
 }
 
 class BuildingDataObject extends GenericDataObject {
-  data: IBuildingDataObject;
-  constructor(data: IBuildingDataObject) {
+  data: IBuildingData;
+  constructor(data: IBuildingData) {
     super(data);
     this.data = data;
   }
@@ -89,7 +89,7 @@ export class BuildingMapper extends GenericMapper {
       }
 
       // map original data to class attribute
-      const dataObject: IBuildingDataObject = {
+      const data: IBuildingData = {
         objectId: bName,
         yearBuilt: bAttrDict['YearBuilt'],
         monthlyAverageWatts: bAttrDict['Monthly Average Watts'],
@@ -105,7 +105,7 @@ export class BuildingMapper extends GenericMapper {
       };
 
       // add new data object as a new entry to the data lookup table
-      const newDataObject = new BuildingDataObject(dataObject);
+      const newDataObject = new BuildingDataObject(data);
       this.table[bName] = newDataObject;
     }
 
