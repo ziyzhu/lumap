@@ -6,6 +6,7 @@ import {RpcInterfaceDefinition, IModelReadRpcInterface, IModelTileRpcInterface, 
 import {PresentationRpcInterface} from '@bentley/presentation-common';
 import {Presentation} from '@bentley/presentation-frontend';
 import {UiComponents} from '@bentley/ui-components';
+import * as AppConfig from './AppConfig.json';
 
 /**
  ** Returns a list of RPCs supported by this application
@@ -61,9 +62,9 @@ export class AppClient {
   }
 
   private static async initializeOidc() {
-    const clientId = 'imodeljs-spa-samples-2686'; //Config.App.getString('imjs_browser_test_client_id');
-    const redirectUri = 'http://localhost:3000/signin-callback.html'; //Config.App.getString('imjs_browser_test_redirect_uri');
-    const scope = 'openid email profile organization imodelhub context-registry-service:read-only product-settings-service general-purpose-imodeljs-backend imodeljs-router'; //Config.App.getString('imjs_browser_test_scope');
+    const clientId = AppConfig.imjs_browser_client_id;
+    const redirectUri = AppConfig.imjs_browser_redirect_uri;
+    const scope = AppConfig.imjs_browser_scope;
     const responseType = 'code';
     const oidcConfig: OidcFrontendClientConfiguration = {clientId, redirectUri, scope, responseType};
 
