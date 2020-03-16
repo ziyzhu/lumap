@@ -85,8 +85,8 @@ export default class IModelPage extends React.Component<{}, IState> {
 
   /** Finds project and imodel ids using their names */
   private async _getIModelInfo(): Promise<{projectId: string; imodelId: string}> {
-    const projectName = 'Lehigh Campus'; //Config.App.get('imjs_test_project');
-    const imodelName = 'Lehigh Campus'; //Config.App.get('imjs_test_imodel');
+    const projectName = 'Lehigh_Buildings'; //Config.App.get('imjs_test_project');
+    const imodelName = 'Lehigh_Buildings'; //Config.App.get('imjs_test_imodel');
 
     const requestContext: AuthorizedFrontendRequestContext = await AuthorizedFrontendRequestContext.create();
 
