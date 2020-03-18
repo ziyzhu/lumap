@@ -7,6 +7,7 @@ import {IModelApp, IModelConnection, FrontendRequestContext, AuthorizedFrontendR
 import {Presentation, SelectionChangeEventArgs, ISelectionProvider, IFavoritePropertiesStorage, FavoriteProperties, FavoritePropertiesManager} from '@bentley/presentation-frontend';
 //import { SignIn } from "@bentley/ui-components";
 import {AppClient} from '../api/AppClient';
+import * as AppConfig from '../api/AppConfig.json';
 import {SimpleViewportComponent} from '../components/Viewport';
 import Toolbar from '../components/Toolbar';
 import {SignIn} from '@bentley/ui-components';
@@ -85,8 +86,8 @@ export default class IModelPage extends React.Component<{}, IState> {
 
   /** Finds project and imodel ids using their names */
   private async _getIModelInfo(): Promise<{projectId: string; imodelId: string}> {
-    const projectName = 'Lehigh_Buildings'; //Config.App.get('imjs_test_project');
-    const imodelName = 'Lehigh_Buildings'; //Config.App.get('imjs_test_imodel');
+    const projectName = AppConfig.imjs_project_name;
+    const imodelName = AppConfig.imjs_imodel_name;
 
     const requestContext: AuthorizedFrontendRequestContext = await AuthorizedFrontendRequestContext.create();
 
@@ -171,26 +172,67 @@ export default class IModelPage extends React.Component<{}, IState> {
     this.setState(prev => ({user: {...prev.user, accessToken, isLoading: false}}));
   };
 
+  private get _signInRedirectUri() {
+    const split = AppConfig.imjs_browser_redirect_uri.split('://');
+    return split[split.length - 1];
+  }
+
+  private _onRegister = () => {
+    window.open('https://git.io/fx8YP', '_blank');
+  };
+
+  private _onOffline = () => {
+    this.setState(prev => ({user: {...prev.user, isLoading: false}, offlineIModel: true}));
+  };
+
+  private delayedInitialization() {
+    if (this.state.offlineIModel) {
+      // WORKAROUND: create 'local' FavoritePropertiesManager when in 'offline' or snapshot mode. Otherwise,
+      // the PresentationManager will try to use the Settings service online and fail.
+      const storage: IFavoritePropertiesStorage = {
+        loadProperties: async (_?: string, __?: string) => ({
+          nestedContentInfos: new Set<string>(),
+          propertyInfos: new Set<string>(),
+          baseFieldInfos: new Set<string>(),
+        }),
+        async saveProperties(_: FavoriteProperties, __?: string, ___?: string) {},
+      };
+      Presentation.favoriteProperties = new FavoritePropertiesManager({storage});
+
+      // WORKAROUND: Clear authorization client if operating in offline mode
+      IModelApp.authorizationClient = undefined;
+    }
+
+    // initialize Presentation
+    Presentation.initialize({activeLocale: IModelApp.i18n.languageList()[0]});
+  }
+
   render() {
-    // ID of the presentation ruleset used by all of the controls; the ruleset
-    // can be found at `assets/presentation_rules/Default.PresentationRuleSet.xml`
     const rulesetId = 'Default';
-    if (this.state.user.isLoading) {
+    let ui: React.ReactNode;
+
+    if (this.state.user.isLoading || window.location.href.includes(this._signInRedirectUri)) {
       // if user is currently being loaded, just tell that
-      return <h1>signing-in...</h1>;
-    } else if (!this.state.user.accessToken) {
-      // if user doesn't have and access token, show sign in page
-      return <SignIn onSignIn={this._onStartSignin} />;
-    } else if (this.state.imodel && this.state.viewDefinitionId) {
-      return (
+      ui = `${IModelApp.i18n.translate('SimpleViewer:signing-in')}...`;
+    } else if (!AppClient.oidcClient.hasSignedIn && !this.state.offlineIModel) {
+      // if user doesn't have an access token, show sign in page
+      // Only call with onOffline prop for electron mode since this is not a valid option for Web apps
+      // TODO this step should be bypassed
+      if (ElectronRpcConfiguration.isElectron) ui = <SignIn onSignIn={this._onStartSignin} onRegister={this._onRegister} onOffline={this._onOffline} />;
+      else ui = <SignIn onSignIn={this._onStartSignin} onRegister={this._onRegister} />;
+    } else if (!this.state.imodel || !this.state.viewDefinitionId) {
+      // NOTE: We needed to delay some initialization until now so we know if we are opening a snapshot or an imodel.
+      this.delayedInitialization();
+    } else {
+      // if we do have an imodel and view definition id - render imodel components
+      ui = (
         <>
           <SimpleViewportComponent rulesetId={rulesetId} imodel={this.state.imodel} viewDefinitionId={this.state.viewDefinitionId} />
           <Toolbar />
           <DrawerComponent />
         </>
       );
-    } else {
-      return <h1>Nothing</h1>;
     }
+    return <div>{ui}</div>;
   }
 }

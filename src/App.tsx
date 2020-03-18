@@ -8,7 +8,7 @@ import IModelPage from './pages/IModelPage';
 function App() {
   return (
     <BrowserRouter>
-      <Route exact path="/" component={IModelPage} />
+      <Route exact path={['/', '/home']} component={IModelPage} />
     </BrowserRouter>
   );
 }
