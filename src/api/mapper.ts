@@ -1,4 +1,3 @@
-import * as FrozenSharkMeterData from './PI_Shark_Meter_Frozen_Data.json';
 import {EmphasizeElementManager} from './EmphasizeElementManager';
 
 interface IDynamicValue {
@@ -48,28 +47,25 @@ abstract class GenericMapper {
     this.bridge = {};
     this.table = {};
   }
-  abstract init(): void;
-  //abstract getDataObject(string): GenericDataObject;
 }
 
 export class BuildingMapper extends GenericMapper {
   constructor() {
     super();
-    this.init();
-  }
-
-  // must be called immediately upon construction
-  public init() {
-    // hardcoded bridge
     this.bridge = {
       '0x129128': 'Steps1',
       '0xFF2B3': 'PackardLab',
       '0xFF2B4': 'Alumni',
       '0x1ffd8': 'Linderman',
     };
+    this.table = this.createTable();
+  }
 
+  // must be called immediately upon construction
+  public createTable() {
+    const table: {[ecInstanceId: string]: BuildingDataObject} = {};
     // use external data
-    const bDict: any = FrozenSharkMeterData;
+    const bDict: any = require('./PI_Shark_Meter_Frozen_Data.json');
     for (const bName in bDict) {
       // building object
       const bObject: any = bDict[bName];
@@ -107,14 +103,20 @@ export class BuildingMapper extends GenericMapper {
 
       // add new data object as a new entry to the data lookup table
       const newDataObject = new BuildingDataObject(data);
-      this.table[bName] = newDataObject;
+      table[bName] = newDataObject;
     }
-
-    console.log(this.table);
+    return table;
   }
 
   getDataObject(ecInstanceId: string): BuildingDataObject {
-    //TODO add implementation
     return this.table[ecInstanceId];
+  }
+
+  getDataObjects(ecInstanceIdList: string[]): BuildingDataObject[] {
+    let objects: BuildingDataObject[] = [];
+    for (const ecInstanceId of ecInstanceIdList) {
+      objects.push(this.table[ecInstanceId]);
+    }
+    return objects;
   }
 }

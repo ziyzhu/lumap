@@ -8,6 +8,7 @@ import {Presentation, SelectionChangeEventArgs, ISelectionProvider, IFavoritePro
 //import { SignIn } from "@bentley/ui-components";
 import {AppClient} from '../api/AppClient';
 import * as AppConfig from '../api/AppConfig.json';
+import {AppSetting} from '../api/AppSetting';
 import {SimpleViewportComponent} from '../components/Viewport';
 import Toolbar from '../components/Toolbar';
 import {SignIn} from '@bentley/ui-components';
@@ -79,7 +80,7 @@ export default class IModelPage extends React.Component<{}, IState> {
       const info = await this._getIModelInfo();
       imodel = await IModelConnection.open(info.projectId, info.imodelId, OpenMode.Readonly);
     } catch (e) {
-      alert(e.message);
+      console.log(e.message);
     }
     await this._onIModelSelected(imodel);
   };
@@ -114,6 +115,9 @@ export default class IModelPage extends React.Component<{}, IState> {
       return;
     }
     try {
+      // configuring iModel properties before a view definition is open
+      AppSetting.apply(imodel);
+
       // attempt to get a view definition
       const viewDefinitionId = await this.getFirstViewDefinitionId(imodel);
       this.setState({imodel, viewDefinitionId});
@@ -121,12 +125,13 @@ export default class IModelPage extends React.Component<{}, IState> {
       // if failed, close the imodel and reset the state
       await imodel.close();
       this.setState({imodel: undefined, viewDefinitionId: undefined});
-      alert(e.message);
+      console.log(e.message);
     }
   };
 
   private _onSelectionChanged = (evt: SelectionChangeEventArgs, selectionProvider: ISelectionProvider) => {
     const selection = selectionProvider.getSelection(evt.imodel, evt.level);
+
     if (selection.isEmpty) {
       console.log('Selection cleared');
     } else {
