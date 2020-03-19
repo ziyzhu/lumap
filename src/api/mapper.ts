@@ -1,3 +1,4 @@
+import {IModelConnection} from '@bentley/imodeljs-frontend';
 import {EmphasizeElementManager} from './EmphasizeElementManager';
 
 interface IDynamicValue {
@@ -47,23 +48,38 @@ abstract class GenericMapper {
     this.bridge = {};
     this.table = {};
   }
+  public async asyncQuery(imodel: IModelConnection, q: string): Promise<any[]> {
+    const rows: any[] = [];
+    for await (const row of imodel.query(q)) rows.push(row);
+    return rows;
+  }
 }
 
 export class BuildingMapper extends GenericMapper {
   constructor() {
     super();
-    this.bridge = {
-      '0x129128': 'Steps1',
-      '0xFF2B3': 'PackardLab',
-      '0xFF2B4': 'Alumni',
-      '0x1ffd8': 'Linderman',
-    };
-    this.table = this.createTable();
+    // uses building number as the bridge key to connect imodel and data
+    this.bridge = undefined;
+    this.table = undefined;
+  }
+
+  public async createBridge(imodel: IModelConnection) {
+    // closure function to remove leading zero in a string
+    const adaptor = (s: string) => s.replace(/^0+/, '');
+
+    const bridge: {[ecInstanceId: string]: string} = {};
+    const imodelBuildings = await this.asyncQuery(imodel, 'select * from DgnCustomItemTypes_Building.Building__x0020__InformationElementAspect;');
+
+    for (const building of imodelBuildings) {
+      bridge[building.element.id] = adaptor(building.building__x0020__Number);
+    }
+
+    this.bridge = bridge;
   }
 
   // must be called immediately upon construction
   public createTable() {
-    const table: {[ecInstanceId: string]: BuildingDataObject} = {};
+    const table: {[bridgeKey: string]: BuildingDataObject} = {};
     // use external data
     const bDict: any = require('./PI_Shark_Meter_Frozen_Data.json');
     for (const bName in bDict) {
@@ -103,19 +119,22 @@ export class BuildingMapper extends GenericMapper {
 
       // add new data object as a new entry to the data lookup table
       const newDataObject = new BuildingDataObject(data);
-      table[bName] = newDataObject;
+      const buildingNumber = data['buildingNumber']['value'];
+      table[buildingNumber] = newDataObject;
     }
-    return table;
+
+    this.table = table;
   }
 
   getDataObject(ecInstanceId: string): BuildingDataObject {
-    return this.table[ecInstanceId];
+    return this.table[this.bridge[ecInstanceId]];
   }
 
-  getDataObjects(ecInstanceIdList: string[]): BuildingDataObject[] {
+  getDataObjects(ecInstanceIdSet: Set<string>): BuildingDataObject[] {
+    const ecInstanceIdList = Array.from(ecInstanceIdSet);
     let objects: BuildingDataObject[] = [];
     for (const ecInstanceId of ecInstanceIdList) {
-      objects.push(this.table[ecInstanceId]);
+      objects.push(this.table[this.bridge[ecInstanceId]]);
     }
     return objects;
   }

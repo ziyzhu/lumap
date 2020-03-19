@@ -2,10 +2,16 @@ import {BuildingMapper} from './mapper';
 import {IModelConnection} from '@bentley/imodeljs-frontend';
 
 export class AppSetting {
-  public static apply(imodel: IModelConnection) {
-    const buildingMapper = new BuildingMapper();
-    // TODO further use IModelConnection object
-    console.log(buildingMapper.table);
-    console.log(imodel.views);
+  public buildingMapper: BuildingMapper;
+  constructor(imodel: IModelConnection) {
+    this.buildingMapper = new BuildingMapper();
+    this.buildingMapper.createBridge(imodel).then(() => {
+      console.log(this.buildingMapper.bridge);
+    });
+    this.buildingMapper.createTable();
+  }
+  public apply() {
+    // TODO to be implemented
+    console.log(this.buildingMapper.table);
   }
 }

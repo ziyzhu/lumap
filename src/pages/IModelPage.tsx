@@ -29,6 +29,7 @@ interface IState {
   offlineIModel: boolean;
   imodel?: IModelConnection;
   viewDefinitionId?: Id64String;
+  appSetting?: AppSetting;
 }
 
 export default class IModelPage extends React.Component<{}, IState> {
@@ -43,6 +44,7 @@ export default class IModelPage extends React.Component<{}, IState> {
       offlineIModel: false,
       viewDefinitionId: undefined,
       imodel: undefined,
+      appSetting: undefined,
     };
     IModelApp.viewManager.onViewOpen.addOnce(vp => {
       const viewFlags = vp.viewFlags.clone();
@@ -116,7 +118,8 @@ export default class IModelPage extends React.Component<{}, IState> {
     }
     try {
       // configuring iModel properties before a view definition is open
-      AppSetting.apply(imodel);
+      this.setState({appSetting: new AppSetting(imodel)});
+      if (this.state.appSetting) this.state.appSetting.apply();
 
       // attempt to get a view definition
       const viewDefinitionId = await this.getFirstViewDefinitionId(imodel);
@@ -131,6 +134,7 @@ export default class IModelPage extends React.Component<{}, IState> {
 
   private _onSelectionChanged = (evt: SelectionChangeEventArgs, selectionProvider: ISelectionProvider) => {
     const selection = selectionProvider.getSelection(evt.imodel, evt.level);
+    const buildingMapper = this.state.appSetting ? this.state.appSetting.buildingMapper : undefined;
 
     if (selection.isEmpty) {
       console.log('Selection cleared');
@@ -141,6 +145,9 @@ export default class IModelPage extends React.Component<{}, IState> {
         console.log('ECInstances:');
         selection.instanceKeys.forEach((ids, ecclass) => {
           console.log(`${ecclass}: ${[...ids].join(',')}`);
+
+          if (buildingMapper) console.log(buildingMapper.getDataObjects(ids));
+
           EmphasizeElementManager.runAction(ActionType.Override);
         });
       }
