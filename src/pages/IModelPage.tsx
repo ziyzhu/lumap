@@ -50,6 +50,7 @@ export default class IModelPage extends React.Component<{}, IState> {
       const viewFlags = vp.viewFlags.clone();
       viewFlags.shadows = false;
       vp.viewFlags = viewFlags;
+      console.log(viewFlags);
     });
   }
 

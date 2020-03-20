@@ -1,6 +1,11 @@
 import {IModelConnection} from '@bentley/imodeljs-frontend';
 import {EmphasizeElementManager} from './EmphasizeElementManager';
 
+interface IGenericData {
+  objectId: string;
+}
+
+// represents PI data structure
 interface IDynamicValue {
   value: string;
   unitAbbreviation: string;
@@ -8,10 +13,7 @@ interface IDynamicValue {
   good: boolean;
 }
 
-interface IGenericData {
-  objectId: string;
-}
-
+// represents PI data structure
 export interface IBuildingData extends IGenericData {
   yearBuilt: IDynamicValue;
   monthlyAverageWatts: IDynamicValue;
@@ -48,6 +50,8 @@ abstract class GenericMapper {
     this.bridge = {};
     this.table = {};
   }
+
+  // Asynchronously returns the queried rows
   public async asyncQuery(imodel: IModelConnection, q: string): Promise<any[]> {
     const rows: any[] = [];
     for await (const row of imodel.query(q)) rows.push(row);
@@ -63,6 +67,8 @@ export class BuildingMapper extends GenericMapper {
     this.table = undefined;
   }
 
+  // Asynchronously creates a matching table: ecinstance ID => Matching Key
+  // Note; must be called upon construction
   public async createBridge(imodel: IModelConnection) {
     // closure function to remove leading zero in a string
     const adaptor = (s: string) => s.replace(/^0+/, '');
@@ -77,7 +83,8 @@ export class BuildingMapper extends GenericMapper {
     this.bridge = bridge;
   }
 
-  // must be called immediately upon construction
+  // Synchronously creates a matching table: Matching Key => Data Object.
+  // Note; must be called upon construction
   public createTable() {
     const table: {[bridgeKey: string]: BuildingDataObject} = {};
     // use external data
@@ -126,10 +133,12 @@ export class BuildingMapper extends GenericMapper {
     this.table = table;
   }
 
+  // Returns a single object from a ecinstance ID
   getDataObject(ecInstanceId: string): BuildingDataObject {
     return this.table[this.bridge[ecInstanceId]];
   }
 
+  // Returns multiple objects from a set of ecinstance ID's
   getDataObjects(ecInstanceIdSet: Set<string>): BuildingDataObject[] {
     const ecInstanceIdList = Array.from(ecInstanceIdSet);
     let objects: BuildingDataObject[] = [];
