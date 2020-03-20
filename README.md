@@ -1,6 +1,15 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## Available Scripts
+## Main Concepts
+
+* **Data Object**: Data from external sources are represented as Data Objects in LUmap. For example, a building data object provided by the PI System is represented by BuildingDataObject. 
+
+* **Matching Key**: A matching key is the common value found in both iModel ecinstances and **Data Objects**. 
+    
+* **Mapper**: A Mapper instance is used to map iModel objects(ecinstances) to the customized objects in the app which may contain data from external resources. A Mapper mainly consists of two attributes, Mapper.bridge and Mapper.table, both are JavaScript dictionaries. However, Mapper.bridge maps ecinstance ID to a **Matching Key** while Mapper.table maps a **Matching Key** to the corresponding **Data Objects**.
+
+## How to Run This App
+
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 In the project directory, you can run:
 
