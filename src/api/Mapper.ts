@@ -88,7 +88,7 @@ export class BuildingMapper extends GenericMapper {
   public createTable() {
     const table: {[bridgeKey: string]: BuildingDataObject} = {};
     // use external data
-    const bDict: any = require('./PI_Shark_Meter_Frozen_Data.json');
+    const bDict: any = require('./PI_Shark_Meter_Read_Snapshot.json');
     for (const bName in bDict) {
       // building object
       const bObject: any = bDict[bName];
@@ -96,9 +96,6 @@ export class BuildingMapper extends GenericMapper {
       const bAttrDict: {[attrName: string]: IDynamicValue} = {};
 
       for (const bAttr in bObject) {
-        // ignore detailed meter data
-        if (bAttr === 'Amps A') break;
-
         const value: IDynamicValue = {
           value: bObject[bAttr]['Value'],
           unitAbbreviation: bObject[bAttr]['UnitsAbbreviation'],

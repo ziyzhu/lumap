@@ -13,7 +13,7 @@ import {SimpleViewportComponent} from '../components/Viewport';
 import Toolbar from '../components/Toolbar';
 import {SignIn} from '@bentley/ui-components';
 import DrawerComponent from '../components/DrawerComponent';
-import {BuildingMapper} from '../api/mapper';
+import {BuildingMapper} from '../api/Mapper';
 import {ActionType, EmphasizeElementManager} from '../api/EmphasizeElementManager';
 
 // initialize logging to the console

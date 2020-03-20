@@ -1,4 +1,4 @@
-import {BuildingMapper} from './mapper';
+import {BuildingMapper} from './Mapper';
 import {IModelConnection} from '@bentley/imodeljs-frontend';
 
 export class AppSetting {
