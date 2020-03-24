@@ -2,7 +2,7 @@ import {IModelConnection} from '@bentley/imodeljs-frontend';
 import {EmphasizeElementManager} from './EmphasizeElementManager';
 
 interface IGenericData {
-  objectId: string;
+  matchingKey: string;
 }
 
 // represents PI data structure
@@ -44,11 +44,14 @@ class BuildingDataObject extends GenericDataObject {
 }
 
 abstract class GenericMapper {
-  public bridge;
-  public table;
+  public ecToKeyTable;
+  public keyToDataTable;
+  public keyToEcTable;
+
   constructor() {
-    this.bridge = {};
-    this.table = {};
+    this.ecToKeyTable = {};
+    this.keyToDataTable = {};
+    this.keyToEcTable = {};
   }
 
   // Asynchronously returns the queried rows
@@ -62,31 +65,46 @@ abstract class GenericMapper {
 export class BuildingMapper extends GenericMapper {
   constructor() {
     super();
-    // uses building number as the bridge key to connect imodel and data
-    this.bridge = undefined;
-    this.table = undefined;
+    // uses building number as the matching key to connect imodel and data
+    this.ecToKeyTable = undefined;
+    this.keyToDataTable = undefined;
+    this.keyToEcTable = undefined;
+  }
+
+  public async init(imodel: IModelConnection) {
+    this.ecToKeyTable = await this.createEcToKeyTable(imodel);
+    this.keyToEcTable = this.createKeyToEcTable();
+    this.keyToDataTable = this.createKeyToDataTable();
+  }
+
+  public createKeyToEcTable() {
+    const keyToEcTable = {};
+    Object.keys(this.ecToKeyTable).forEach(key => {
+      keyToEcTable[this.ecToKeyTable[key]] = key;
+    });
+    return keyToEcTable;
   }
 
   // Asynchronously creates a matching table: ecinstance ID => Matching Key
   // Note; must be called upon construction
-  public async createBridge(imodel: IModelConnection) {
+  public async createEcToKeyTable(imodel: IModelConnection) {
     // closure function to remove leading zero in a string
     const adaptor = (s: string) => s.replace(/^0+/, '');
 
-    const bridge: {[ecInstanceId: string]: string} = {};
+    const ecToKeyTable: {[ecInstanceId: string]: string} = {};
     const imodelBuildings = await this.asyncQuery(imodel, 'select * from DgnCustomItemTypes_Building.Building__x0020__InformationElementAspect;');
 
     for (const building of imodelBuildings) {
-      bridge[building.element.id] = adaptor(building.building__x0020__Number);
+      ecToKeyTable[building.element.id] = adaptor(building.building__x0020__Number);
     }
 
-    this.bridge = bridge;
+    return ecToKeyTable;
   }
 
   // Synchronously creates a matching table: Matching Key => Data Object.
   // Note; must be called upon construction
-  public createTable() {
-    const table: {[bridgeKey: string]: BuildingDataObject} = {};
+  public createKeyToDataTable() {
+    const keyToDataTable: {[matchingKey: string]: BuildingDataObject} = {};
     // use external data
     const bDict: any = require('./PI_Shark_Meter_Read_Snapshot.json');
     for (const bName in bDict) {
@@ -107,7 +125,7 @@ export class BuildingMapper extends GenericMapper {
 
       // map original data to class attribute
       const data: IBuildingData = {
-        objectId: bName,
+        matchingKey: bAttrDict['BuildingNumber']['value'],
         yearBuilt: bAttrDict['YearBuilt'],
         monthlyAverageWatts: bAttrDict['Monthly Average Watts'],
         longitude: bAttrDict['Longitude'],
@@ -124,15 +142,15 @@ export class BuildingMapper extends GenericMapper {
       // add new data object as a new entry to the data lookup table
       const newDataObject = new BuildingDataObject(data);
       const buildingNumber = data['buildingNumber']['value'];
-      table[buildingNumber] = newDataObject;
+      keyToDataTable[buildingNumber] = newDataObject;
     }
 
-    this.table = table;
+    return keyToDataTable;
   }
 
   // Returns a single object from a ecinstance ID
   getDataObject(ecInstanceId: string): BuildingDataObject {
-    return this.table[this.bridge[ecInstanceId]];
+    return this.keyToDataTable[this.ecToKeyTable[ecInstanceId]];
   }
 
   // Returns multiple objects from a set of ecinstance ID's
@@ -140,7 +158,7 @@ export class BuildingMapper extends GenericMapper {
     const ecInstanceIdList = Array.from(ecInstanceIdSet);
     let objects: BuildingDataObject[] = [];
     for (const ecInstanceId of ecInstanceIdList) {
-      objects.push(this.table[this.bridge[ecInstanceId]]);
+      objects.push(this.keyToDataTable[this.ecToKeyTable[ecInstanceId]]);
     }
     return objects;
   }
