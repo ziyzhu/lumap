@@ -15,6 +15,7 @@ interface IDynamicValue {
 
 // represents PI data structure
 export interface IBuildingData extends IGenericData {
+  buildingName: string;
   yearBuilt: IDynamicValue;
   monthlyAverageWatts: IDynamicValue;
   longitude: IDynamicValue;
@@ -28,14 +29,14 @@ export interface IBuildingData extends IGenericData {
   dailyEnergy: IDynamicValue;
 }
 
-class GenericDataObject {
+export class GenericDataObject {
   data: IGenericData;
   constructor(data: IGenericData) {
     this.data = data;
   }
 }
 
-class BuildingDataObject extends GenericDataObject {
+export class BuildingDataObject extends GenericDataObject {
   data: IBuildingData;
   constructor(data: IBuildingData) {
     super(data);
@@ -126,6 +127,7 @@ export class BuildingMapper extends GenericMapper {
       // map original data to class attribute
       const data: IBuildingData = {
         matchingKey: bAttrDict['BuildingNumber']['value'],
+        buildingName: bName,
         yearBuilt: bAttrDict['YearBuilt'],
         monthlyAverageWatts: bAttrDict['Monthly Average Watts'],
         longitude: bAttrDict['Longitude'],

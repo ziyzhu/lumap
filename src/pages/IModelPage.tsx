@@ -3,7 +3,7 @@ import * as React from 'react';
 import {ElectronRpcConfiguration} from '@bentley/imodeljs-common';
 import {OpenMode, ClientRequestContext, Logger, LogLevel, Id64, Id64String} from '@bentley/bentleyjs-core';
 import {AccessToken, ConnectClient, IModelQuery, Project, Config} from '@bentley/imodeljs-clients';
-import {IModelApp, IModelConnection, FrontendRequestContext, AuthorizedFrontendRequestContext, SpatialViewState, DrawingViewState} from '@bentley/imodeljs-frontend';
+import {IModelApp, IModelConnection, FrontendRequestContext, AuthorizedFrontendRequestContext, SpatialViewState, DrawingViewState, Viewport} from '@bentley/imodeljs-frontend';
 import {Presentation, SelectionChangeEventArgs, ISelectionProvider, IFavoritePropertiesStorage, FavoriteProperties, FavoritePropertiesManager} from '@bentley/presentation-frontend';
 //import { SignIn } from "@bentley/ui-components";
 import {AppClient} from '../api/AppClient';
@@ -13,7 +13,7 @@ import {SimpleViewportComponent} from '../components/Viewport';
 import Toolbar from '../components/Toolbar';
 import {SignIn} from '@bentley/ui-components';
 import DrawerComponent from '../components/DrawerComponent';
-import {BuildingMapper} from '../api/Mapper';
+import {BuildingMapper, BuildingDataObject} from '../api/Mapper';
 import {ActionType, EmphasizeElementManager} from '../api/EmphasizeElementManager';
 
 // initialize logging to the console
@@ -30,6 +30,7 @@ interface IState {
   imodel?: IModelConnection;
   viewDefinitionId?: Id64String;
   appSetting?: AppSetting;
+  selectedObjects?: BuildingDataObject[];
 }
 
 export default class IModelPage extends React.Component<{}, IState> {
@@ -45,12 +46,12 @@ export default class IModelPage extends React.Component<{}, IState> {
       viewDefinitionId: undefined,
       imodel: undefined,
       appSetting: undefined,
+      selectedObjects: undefined,
     };
     IModelApp.viewManager.onViewOpen.addOnce(vp => {
       const viewFlags = vp.viewFlags.clone();
       viewFlags.shadows = false;
       vp.viewFlags = viewFlags;
-      console.log(viewFlags);
     });
   }
 
@@ -147,8 +148,9 @@ export default class IModelPage extends React.Component<{}, IState> {
         selection.instanceKeys.forEach((ids, ecclass) => {
           console.log(`${ecclass}: ${[...ids].join(',')}`);
 
-          if (buildingMapper) console.log(buildingMapper.getDataObjects(ids));
-
+          if (buildingMapper) {
+            this.setState({selectedObjects: buildingMapper.getDataObjects(ids)});
+          }
           EmphasizeElementManager.runAction(ActionType.Override);
         });
       }
@@ -233,7 +235,7 @@ export default class IModelPage extends React.Component<{}, IState> {
       // TODO this step should be bypassed
       if (ElectronRpcConfiguration.isElectron) ui = <SignIn onSignIn={this._onStartSignin} onRegister={this._onRegister} onOffline={this._onOffline} />;
       else ui = <SignIn onSignIn={this._onStartSignin} onRegister={this._onRegister} />;
-    } else if (!this.state.imodel || !this.state.viewDefinitionId) {
+    } else if (!this.state.imodel || !this.state.viewDefinitionId || !this.state.appSetting) {
       // NOTE: We needed to delay some initialization until now so we know if we are opening a snapshot or an imodel.
       this.delayedInitialization();
     } else {
@@ -242,7 +244,7 @@ export default class IModelPage extends React.Component<{}, IState> {
         <>
           <SimpleViewportComponent rulesetId={rulesetId} imodel={this.state.imodel} viewDefinitionId={this.state.viewDefinitionId} />
           <Toolbar />
-          <DrawerComponent />
+          <DrawerComponent appSetting={this.state.appSetting} selectedObjects={this.state.selectedObjects} />
         </>
       );
     }
