@@ -17,6 +17,7 @@
     "@bentley/ui-components": "1.12.0",
     "@bentley/ui-core": "1.12.0",
     "@blueprintjs/core": "^3.24.0",
+    "axios": "^0.19.2",
     "lodash": "^4.17.10",
     "node-sass": "^4.13.1",
     "react": "^16.13.0",
