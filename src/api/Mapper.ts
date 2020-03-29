@@ -1,5 +1,4 @@
 import {IModelConnection} from '@bentley/imodeljs-frontend';
-import {EmphasizeElementManager} from './EmphasizeElementManager';
 
 interface IGenericData {
   matchingKey: string;
@@ -48,11 +47,13 @@ abstract class GenericMapper {
   public ecToKeyTable;
   public keyToDataTable;
   public keyToEcTable;
+  static mapper;
 
   constructor() {
     this.ecToKeyTable = {};
     this.keyToDataTable = {};
     this.keyToEcTable = {};
+    GenericMapper.mapper = this;
   }
 
   // Asynchronously returns the queried rows
@@ -70,6 +71,7 @@ export class BuildingMapper extends GenericMapper {
     this.ecToKeyTable = undefined;
     this.keyToDataTable = undefined;
     this.keyToEcTable = undefined;
+    BuildingMapper.mapper = this;
   }
 
   public async init(imodel: IModelConnection) {
@@ -151,17 +153,25 @@ export class BuildingMapper extends GenericMapper {
   }
 
   // Returns a single object from a ecinstance ID
-  getDataObject(ecInstanceId: string): BuildingDataObject {
+  getDataFromEc(ecInstanceId: string): BuildingDataObject {
     return this.keyToDataTable[this.ecToKeyTable[ecInstanceId]];
   }
 
   // Returns multiple objects from a set of ecinstance ID's
-  getDataObjects(ecInstanceIdSet: Set<string>): BuildingDataObject[] {
+  getDataFromEcSet(ecInstanceIdSet: Set<string>): BuildingDataObject[] {
     const ecInstanceIdList = Array.from(ecInstanceIdSet);
     let objects: BuildingDataObject[] = [];
     for (const ecInstanceId of ecInstanceIdList) {
       objects.push(this.keyToDataTable[this.ecToKeyTable[ecInstanceId]]);
     }
     return objects;
+  }
+
+  getKeyFromEc(ecId: string) {
+    return this.ecToKeyTable[ecId];
+  }
+
+  getEcFromKey(matchingKey: string) {
+    return this.keyToEcTable[matchingKey];
   }
 }

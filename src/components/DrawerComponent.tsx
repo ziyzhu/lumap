@@ -2,17 +2,11 @@ import * as React from 'react';
 import {Drawer, Button, Classes, Position} from '@blueprintjs/core';
 import {AppSetting} from '../api/AppSetting';
 import {BuildingMapper, BuildingDataObject} from '../api/Mapper';
-import {IModelApp} from '@bentley/imodeljs-frontend';
+import {handleUserEvent, UserEvent} from '../api/UserEvent';
 
 interface IProps {
   appSetting: AppSetting;
   selectedObjects?: BuildingDataObject[];
-}
-
-enum UserEvent {
-  ZoomIn,
-  ZoomOut,
-  // more user events will be supported
 }
 
 export default class DrawerComponent extends React.Component<IProps> {
@@ -31,21 +25,6 @@ export default class DrawerComponent extends React.Component<IProps> {
     };
   }
 
-  private handleUserEvent = (matchingKey: string, event: UserEvent) => {
-    switch (event) {
-      case UserEvent.ZoomIn:
-        if (IModelApp && IModelApp.viewManager && IModelApp.viewManager.selectedView) {
-          const buildingMapper = this.props.appSetting.buildingMapper;
-          const ecId = buildingMapper.keyToEcTable[matchingKey];
-          const viewport = IModelApp.viewManager.selectedView;
-          viewport.zoomToElements(ecId);
-        }
-        break;
-      default:
-        console.log('This event is not yet supported');
-    }
-  };
-
   private handleOpen = () => this.setState({isOpen: true});
   private handleClose = () => this.setState({isOpen: false});
 
@@ -60,7 +39,7 @@ export default class DrawerComponent extends React.Component<IProps> {
             obj ? (
               <>
                 <p key={obj.data.matchingKey}>
-                  <Button onClick={() => this.handleUserEvent(obj.data.matchingKey, UserEvent.ZoomIn)}>Zoom In</Button>
+                  <Button onClick={() => handleUserEvent(obj.data.matchingKey, UserEvent.ZoomIn)}>Zoom In</Button>
                   {Object.keys(obj.data).map(k => (
                     <>
                       <p>{k + ': ' + (typeof obj.data[k] === 'string' ? obj.data[k] : obj.data[k].value)}</p>

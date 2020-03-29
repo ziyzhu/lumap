@@ -14,7 +14,7 @@ import Toolbar from '../components/Toolbar';
 import {SignIn} from '@bentley/ui-components';
 import DrawerComponent from '../components/DrawerComponent';
 import {BuildingMapper, BuildingDataObject} from '../api/Mapper';
-import {ActionType, EmphasizeElementManager} from '../api/EmphasizeElementManager';
+import {ImodelEvent, handleImodelEvent} from '../api/ImodelEvent';
 
 // initialize logging to the console
 Logger.initializeToConsole();
@@ -148,10 +148,13 @@ export default class IModelPage extends React.Component<{}, IState> {
         selection.instanceKeys.forEach((ids, ecclass) => {
           console.log(`${ecclass}: ${[...ids].join(',')}`);
 
+          // trigger events if building mapper exists
           if (buildingMapper) {
-            this.setState({selectedObjects: buildingMapper.getDataObjects(ids)});
+            // take our customized actions when element(s) are selected
+            handleImodelEvent(ImodelEvent.ElementSelected);
+            // pass down selected objects to lower level
+            this.setState({selectedObjects: buildingMapper.getDataFromEcSet(ids)});
           }
-          EmphasizeElementManager.runAction(ActionType.Override);
         });
       }
       if (selection.nodeKeys.size !== 0) {
