@@ -1,14 +1,17 @@
 ## Things to know before testing and editing the app:
 
-* **To change iModel configuration**: 
-    * Edit src/api/AppConfig.json
+### Files: 
+* **AppConfig.json**: iModel configuration.
+* **AppSetting.ts**: callbacks for iModel inilization.
+* **AppClient.ts**: establish iModel backend connection and various iModel client settings.
+* **Mapper.ts**: responsible for mapping between iModel objects and our data objects.
+* **UserEvent.ts**: contains user event handlers.
+* **ImodelEvent**.ts: contains iModel event handlers.
 
-* **To further configure the behaviors of the iModel**: 
-    * Edit src/api/AppSetting.ts
-
-* **You should not edit**: 
-    * src/api/AppClient.ts
-    * src/api/Mapper.ts
+### Folders: 
+* **/api**: contains file that handle various callbacks and app configuration.
+* **/components**: contains React UI components that utilize functions written in /api. 
+* **/pages**: a page is composed of at least one components. React-Router for navigation.
 
 ## How we connect iModel objects to our actual data:
 
