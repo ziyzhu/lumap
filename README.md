@@ -14,9 +14,9 @@
 
 * **Data Object**: Data from external sources are represented as Data Objects in LUmap. For example, a building data object provided by the PI System is represented by BuildingDataObject. 
 
-* **Matching Key**: A matching key is the common value found in both iModel ecinstances and **Data Objects**. 
+* **Matching Key**: A matching key is the common value found in both iModel ecinstances and *Data Objects*. 
     
-* **Mapper**: A Mapper instance is used to map iModel objects(ecinstances) to the customized objects in the app which may contain data from external resources. A Mapper mainly consists of two attributes, Mapper.bridge and Mapper.table, both are JavaScript dictionaries. However, Mapper.bridge maps ecinstance ID to a **Matching Key** while Mapper.table maps a **Matching Key** to the corresponding **Data Objects**.
+* **Mapper**: A Mapper instance is used to map iModel objects(ecinstances) to the customized objects in the app which may contain data from external resources. A Mapper typically consists of three tables: one maps an *EC instance ID* to a *Matching Key*, one maps a *Matching Key* to an *Data Object*, and one maps a *Matching Key* to an *EC instance ID* (used for handling user events).
 
 ## How to run, test, and deploy the app:
 
