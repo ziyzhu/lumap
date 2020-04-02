@@ -1,14 +1,14 @@
 //import React from 'react';
 //import logo from './logo.svg';
-//import './App.css';
+import './App.css';
 import React, {Component} from 'react';
 import {useLocation, BrowserRouter, Route, Switch, Redirect} from 'react-router-dom';
-import IModelPage from './pages/IModelPage';
+import ImodelPage from './pages/ImodelPage';
 
 function App() {
   return (
     <BrowserRouter>
-      <Route exact path={['/', '/home']} component={IModelPage} />
+      <Route exact path={['/', '/home']} component={ImodelPage} />
     </BrowserRouter>
   );
 }

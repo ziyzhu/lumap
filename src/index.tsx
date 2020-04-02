@@ -11,9 +11,7 @@ import '@blueprintjs/icons/lib/css/blueprint-icons.css';
 // initialize the application
 AppClient.startup();
 
-AppClient.ready.then(() => {
-  ReactDOM.render(<App />, document.getElementById('root'));
-});
+ReactDOM.render(<App />, document.getElementById('root'));
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

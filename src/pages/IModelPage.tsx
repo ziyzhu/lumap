@@ -1,18 +1,20 @@
 import * as React from 'react';
-
+// iModel
 import {ElectronRpcConfiguration} from '@bentley/imodeljs-common';
 import {OpenMode, ClientRequestContext, Logger, LogLevel, Id64, Id64String} from '@bentley/bentleyjs-core';
 import {AccessToken, ConnectClient, IModelQuery, Project, Config} from '@bentley/imodeljs-clients';
 import {IModelApp, IModelConnection, FrontendRequestContext, AuthorizedFrontendRequestContext, SpatialViewState, DrawingViewState, Viewport} from '@bentley/imodeljs-frontend';
 import {Presentation, SelectionChangeEventArgs, ISelectionProvider, IFavoritePropertiesStorage, FavoriteProperties, FavoritePropertiesManager} from '@bentley/presentation-frontend';
-//import { SignIn } from "@bentley/ui-components";
+// UI
+import {SignIn} from '@bentley/ui-components';
+import {Spinner} from '@blueprintjs/core';
+import {SimpleViewportComponent} from '../components/Viewport';
+import Toolbar from '../components/Toolbar';
+import DrawerComponent from '../components/DrawerComponent';
+// API files
 import {AppClient} from '../api/AppClient';
 import * as AppConfig from '../api/AppConfig.json';
 import {AppSetting} from '../api/AppSetting';
-import {SimpleViewportComponent} from '../components/Viewport';
-import Toolbar from '../components/Toolbar';
-import {SignIn} from '@bentley/ui-components';
-import DrawerComponent from '../components/DrawerComponent';
 import {BuildingMapper, BuildingDataObject} from '../api/Mapper';
 import {ImodelEvent, handleImodelEvent} from '../api/ImodelEvent';
 
@@ -21,7 +23,34 @@ Logger.initializeToConsole();
 Logger.setLevelDefault(LogLevel.Warning); // Set all logging to a default of Warning
 Logger.setLevel('basic-viewport-app', LogLevel.Info); // Override the above default and set only App level logging to Info.
 
-interface IState {
+interface IStateImodelPage {
+  clientIsReady: boolean;
+}
+
+export default class ImodelPage extends React.Component<{}, IStateImodelPage> {
+  constructor(props) {
+    super(props);
+    this.state = {clientIsReady: false};
+  }
+  componentDidMount() {
+    AppClient.ready.then(() => {
+      this.setState({clientIsReady: true});
+    });
+  }
+  render() {
+    const {clientIsReady} = this.state;
+    // shows iModel once the iModel connection has been established
+    if (clientIsReady) return <ImodelContent />;
+    return (
+      <div className="page-center">
+        <Spinner size={Spinner.SIZE_STANDARD} />
+        <p>We're initializing the app for you...</p>
+      </div>
+    );
+  }
+}
+
+interface IStateImodelContent {
   user: {
     isLoading?: boolean;
     accessToken?: AccessToken;
@@ -33,7 +62,7 @@ interface IState {
   selectedObjects?: BuildingDataObject[];
 }
 
-export default class IModelPage extends React.Component<{}, IState> {
+class ImodelContent extends React.Component<{}, IStateImodelContent> {
   /** Creates an App instance */
   constructor(props?: any, context?: any) {
     super(props, context);
@@ -231,7 +260,12 @@ export default class IModelPage extends React.Component<{}, IState> {
 
     if (this.state.user.isLoading || window.location.href.includes(this._signInRedirectUri)) {
       // if user is currently being loaded, just tell that
-      ui = `${IModelApp.i18n.translate('SimpleViewer:signing-in')}...`;
+      ui = (
+        <div className="page-center">
+          <Spinner size={Spinner.SIZE_STANDARD} />
+          <p>We're signing you in...</p>
+        </div>
+      );
     } else if (!AppClient.oidcClient.hasSignedIn && !this.state.offlineIModel) {
       // if user doesn't have an access token, show sign in page
       // Only call with onOffline prop for electron mode since this is not a valid option for Web apps
