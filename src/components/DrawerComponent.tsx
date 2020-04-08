@@ -1,11 +1,9 @@
 import * as React from 'react';
 import {Drawer, Button, Classes, Position} from '@blueprintjs/core';
-import {AppSetting} from '../api/AppSetting';
 import {BuildingMapper, BuildingDataObject} from '../api/Mapper';
 import {handleUserEvent, UserEvent} from '../api/UserEvent';
 
 interface IProps {
-  appSetting: AppSetting;
   selectedObjects?: BuildingDataObject[];
 }
 

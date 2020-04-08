@@ -3,12 +3,12 @@
 import './App.css';
 import React, {Component} from 'react';
 import {useLocation, BrowserRouter, Route, Switch, Redirect} from 'react-router-dom';
-import ImodelPage from './pages/ImodelPage';
+import IModelPage from './pages/IModelPage';
 
 function App() {
   return (
     <BrowserRouter>
-      <Route exact path={['/', '/home']} component={ImodelPage} />
+      <Route exact path={['/', '/home']} component={IModelPage} />
     </BrowserRouter>
   );
 }

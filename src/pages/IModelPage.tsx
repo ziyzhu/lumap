@@ -27,7 +27,7 @@ interface IStateImodelPage {
   clientIsReady: boolean;
 }
 
-export default class ImodelPage extends React.Component<{}, IStateImodelPage> {
+export default class IModelPage extends React.Component<{}, IStateImodelPage> {
   constructor(props) {
     super(props);
     this.state = {clientIsReady: false};
@@ -40,11 +40,11 @@ export default class ImodelPage extends React.Component<{}, IStateImodelPage> {
   render() {
     const {clientIsReady} = this.state;
     // shows iModel once the iModel connection has been established
-    if (clientIsReady) return <ImodelContent />;
+    if (clientIsReady) return <IModelContent />;
     return (
       <div className="page-center">
         <Spinner size={Spinner.SIZE_STANDARD} />
-        <p>We're initializing the app for you...</p>
+        <p>Initializing the app for you...</p>
       </div>
     );
   }
@@ -62,7 +62,7 @@ interface IStateImodelContent {
   selectedObjects?: BuildingDataObject[];
 }
 
-class ImodelContent extends React.Component<{}, IStateImodelContent> {
+class IModelContent extends React.Component<{}, IStateImodelContent> {
   /** Creates an App instance */
   constructor(props?: any, context?: any) {
     super(props, context);
@@ -159,7 +159,6 @@ class ImodelContent extends React.Component<{}, IStateImodelContent> {
       // if failed, close the imodel and reset the state
       await imodel.close();
       this.setState({imodel: undefined, viewDefinitionId: undefined});
-      console.log(e.message);
     }
   };
 
@@ -263,7 +262,7 @@ class ImodelContent extends React.Component<{}, IStateImodelContent> {
       ui = (
         <div className="page-center">
           <Spinner size={Spinner.SIZE_STANDARD} />
-          <p>We're signing you in...</p>
+          <p>Signing you in...</p>
         </div>
       );
     } else if (!AppClient.oidcClient.hasSignedIn && !this.state.offlineIModel) {
@@ -272,8 +271,14 @@ class ImodelContent extends React.Component<{}, IStateImodelContent> {
       // TODO this step should be bypassed
       if (ElectronRpcConfiguration.isElectron) ui = <SignIn onSignIn={this._onStartSignin} onRegister={this._onRegister} onOffline={this._onOffline} />;
       else ui = <SignIn onSignIn={this._onStartSignin} onRegister={this._onRegister} />;
-    } else if (!this.state.imodel || !this.state.viewDefinitionId || !this.state.appSetting) {
+    } else if (!this.state.imodel || !this.state.viewDefinitionId) {
       // NOTE: We needed to delay some initialization until now so we know if we are opening a snapshot or an imodel.
+      ui = (
+        <div className="page-center">
+          <Spinner size={Spinner.SIZE_STANDARD} />
+          <p>Fetching Lehigh University Campus iModel...</p>
+        </div>
+      );
       this.delayedInitialization();
     } else {
       // if we do have an imodel and view definition id - render imodel components
@@ -281,7 +286,7 @@ class ImodelContent extends React.Component<{}, IStateImodelContent> {
         <>
           <SimpleViewportComponent rulesetId={rulesetId} imodel={this.state.imodel} viewDefinitionId={this.state.viewDefinitionId} />
           <Toolbar />
-          <DrawerComponent appSetting={this.state.appSetting} selectedObjects={this.state.selectedObjects} />
+          <DrawerComponent selectedObjects={this.state.selectedObjects} />
         </>
       );
     }
