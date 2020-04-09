@@ -7,10 +7,11 @@ import {IModelApp, IModelConnection, FrontendRequestContext, AuthorizedFrontendR
 import {Presentation, SelectionChangeEventArgs, ISelectionProvider, IFavoritePropertiesStorage, FavoriteProperties, FavoritePropertiesManager} from '@bentley/presentation-frontend';
 // UI
 import {SignIn} from '@bentley/ui-components';
-import {Spinner} from '@blueprintjs/core';
+import {Spinner, Position, Intent, Button, IToasterProps, IToastProps, Toaster, ToasterPosition} from '@blueprintjs/core';
 import {SimpleViewportComponent} from '../components/Viewport';
 import Toolbar from '../components/Toolbar';
 import DrawerComponent from '../components/DrawerComponent';
+import {DataTableDialog} from '../components/DataTableDialog';
 // API files
 import {AppClient} from '../api/AppClient';
 import * as AppConfig from '../api/AppConfig.json';
@@ -58,8 +59,9 @@ interface IStateImodelContent {
   offlineIModel: boolean;
   imodel?: IModelConnection;
   viewDefinitionId?: Id64String;
-  appSetting?: AppSetting;
   selectedObjects?: BuildingDataObject[];
+  mapperIsReady: boolean;
+  dataTableIsOpen: boolean;
 }
 
 class IModelContent extends React.Component<{}, IStateImodelContent> {
@@ -74,8 +76,9 @@ class IModelContent extends React.Component<{}, IStateImodelContent> {
       offlineIModel: false,
       viewDefinitionId: undefined,
       imodel: undefined,
-      appSetting: undefined,
       selectedObjects: undefined,
+      mapperIsReady: false,
+      dataTableIsOpen: false,
     };
     IModelApp.viewManager.onViewOpen.addOnce(vp => {
       const viewFlags = vp.viewFlags.clone();
@@ -148,9 +151,14 @@ class IModelContent extends React.Component<{}, IStateImodelContent> {
       return;
     }
     try {
-      // configuring iModel properties before a view definition is open
-      this.setState({appSetting: new AppSetting(imodel)});
-      if (this.state.appSetting) this.state.appSetting.apply();
+      // initialize Mapper
+      const buildingMapper = new BuildingMapper();
+      buildingMapper.init(imodel).then(() => {
+        this.setState({mapperIsReady: true});
+      });
+      // initialize App Setting
+      const appSetting = new AppSetting(imodel);
+      appSetting.apply();
 
       // attempt to get a view definition
       const viewDefinitionId = await this.getFirstViewDefinitionId(imodel);
@@ -164,7 +172,6 @@ class IModelContent extends React.Component<{}, IStateImodelContent> {
 
   private _onSelectionChanged = (evt: SelectionChangeEventArgs, selectionProvider: ISelectionProvider) => {
     const selection = selectionProvider.getSelection(evt.imodel, evt.level);
-    const buildingMapper = this.state.appSetting ? this.state.appSetting.buildingMapper : undefined;
 
     if (selection.isEmpty) {
       console.log('Selection cleared');
@@ -177,11 +184,14 @@ class IModelContent extends React.Component<{}, IStateImodelContent> {
           console.log(`${ecclass}: ${[...ids].join(',')}`);
 
           // trigger events if building mapper exists
-          if (buildingMapper) {
+          if (BuildingMapper.mapper) {
+            const selectedObjects = BuildingMapper.mapper.getDataFromEcSet(ids);
+            // Show a toaster
+            this.addToast(this.createToast(selectedObjects && selectedObjects[0] ? selectedObjects[0].data.buildingName : undefined));
             // take our customized actions when element(s) are selected
-            handleImodelEvent(ImodelEvent.ElementSelected);
+            // handleImodelEvent(ImodelEvent.ElementSelected);
             // pass down selected objects to lower level
-            this.setState({selectedObjects: buildingMapper.getDataFromEcSet(ids)});
+            this.setState({selectedObjects: BuildingMapper.mapper.getDataFromEcSet(ids)});
           }
         });
       }
@@ -253,6 +263,45 @@ class IModelContent extends React.Component<{}, IStateImodelContent> {
     Presentation.initialize({activeLocale: IModelApp.i18n.languageList()[0]});
   }
 
+  private toaster: Toaster;
+
+  private refHandlers = {
+    toaster: (ref: Toaster) => (this.toaster = ref),
+  };
+
+  private addToast(toast: IToastProps) {
+    toast.timeout = 5000;
+    this.toaster.show(toast);
+  }
+
+  private createToast(name): IToastProps {
+    if (name) {
+      return {
+        action: {
+          text: <strong>Inspect</strong>,
+          onClick: () => {
+            this.setState({dataTableIsOpen: true});
+          },
+        },
+        intent: Intent.PRIMARY,
+        message: (
+          <>
+            You have selected <b>{name}</b>
+          </>
+        ),
+        timeout: 5000,
+      };
+    } else {
+      return {
+        intent: Intent.WARNING,
+        message: <>This building does not have data yet.</>,
+        timeout: 5000,
+      };
+    }
+  }
+
+  private handleDialogClose = () => this.setState({dataTableIsOpen: false});
+
   render() {
     const rulesetId = 'Default';
     let ui: React.ReactNode;
@@ -280,6 +329,13 @@ class IModelContent extends React.Component<{}, IStateImodelContent> {
         </div>
       );
       this.delayedInitialization();
+    } else if (!this.state.mapperIsReady) {
+      ui = (
+        <div className="page-center">
+          <Spinner size={Spinner.SIZE_STANDARD} />
+          <p>Connecting data to iModel...</p>
+        </div>
+      );
     } else {
       // if we do have an imodel and view definition id - render imodel components
       ui = (
@@ -287,6 +343,8 @@ class IModelContent extends React.Component<{}, IStateImodelContent> {
           <SimpleViewportComponent rulesetId={rulesetId} imodel={this.state.imodel} viewDefinitionId={this.state.viewDefinitionId} />
           <Toolbar />
           <DrawerComponent selectedObjects={this.state.selectedObjects} />
+          <Toaster autoFocus={false} canEscapeKeyClear={true} position={Position.TOP} ref={this.refHandlers.toaster} />;
+          <DataTableDialog handleClose={this.handleDialogClose} isOpen={this.state.dataTableIsOpen} selectedObject={this.state.selectedObjects ? this.state.selectedObjects[0] : undefined} />}
         </>
       );
     }
