@@ -29,16 +29,19 @@ export interface IBuildingData extends IGenericData {
 }
 
 export class GenericDataObject {
+  key: string;
   data: IGenericData;
-  constructor(data: IGenericData) {
+  constructor(key: string, data: IGenericData) {
+    this.key = key;
     this.data = data;
   }
 }
 
 export class BuildingDataObject extends GenericDataObject {
   data: IBuildingData;
-  constructor(data: IBuildingData) {
-    super(data);
+  constructor(key: string, data: IBuildingData) {
+    super(key, data);
+    this.key = key;
     this.data = data;
   }
 }
@@ -147,9 +150,9 @@ export class BuildingMapper extends GenericMapper {
       };
 
       // add new data object as a new entry to the data lookup table
-      const newDataObject = new BuildingDataObject(data);
-      const buildingNumber = data['buildingNumber']['value'];
-      keyToDataTable[buildingNumber] = newDataObject;
+      const objectKey = this.keyToEcTable[data.matchingKey];
+      const newDataObject = new BuildingDataObject(objectKey, data);
+      keyToDataTable[data.matchingKey] = newDataObject;
     }
 
     return keyToDataTable;
