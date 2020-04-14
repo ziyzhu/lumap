@@ -2,6 +2,7 @@ import * as React from 'react';
 import {Drawer, Button, Classes, Position} from '@blueprintjs/core';
 import {BuildingMapper, BuildingDataObject} from '../api/Mapper';
 import {handleUserEvent, UserEvent} from '../api/UserEvent';
+import {SearchBar} from '../components/SearchBar';
 
 interface IProps {
   selectedObjects?: BuildingDataObject[];
@@ -61,13 +62,16 @@ export default class DrawerComponent extends React.Component<IProps> {
     return (
       <>
         <Button style={{position: 'fixed', top: '20px', left: '20px'}} rightIcon="arrow-right" onClick={this.handleOpen}>
-          Show Drawer
+          Menu
         </Button>
-        <Drawer onClose={this.handleClose} title="Lehigh Map" {...this.state}>
+        <Drawer onClose={this.handleClose} title="Lehigh University Campus Map" {...this.state}>
           <div className={Classes.DRAWER_BODY}>
-            <div className={Classes.DIALOG_BODY}>{objStrings}</div>
+            <SearchBar />
+            <div className={Classes.DIALOG_BODY}></div>
           </div>
-          <div className={Classes.DRAWER_FOOTER}>Footer</div>
+          <div className={Classes.DRAWER_FOOTER}>
+            <Button icon="git-repo" text="See Our Github" minimal={true} fill={true} onClick={() => window.open('https://github.com/zachzhu2016/lumap')} />
+          </div>
         </Drawer>
       </>
     );

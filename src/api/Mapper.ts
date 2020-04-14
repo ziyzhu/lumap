@@ -54,6 +54,7 @@ abstract class GenericMapper {
     this.keyToDataTable = {};
     this.keyToEcTable = {};
     GenericMapper.mapper = this;
+    console.log(this);
   }
 
   // Asynchronously returns the queried rows
@@ -65,19 +66,21 @@ abstract class GenericMapper {
 }
 
 export class BuildingMapper extends GenericMapper {
+  public keyToDataTable: {[matchingKey: string]: BuildingDataObject};
+
   constructor() {
     super();
     // uses building number as the matching key to connect imodel and data
-    this.ecToKeyTable = undefined;
-    this.keyToDataTable = undefined;
-    this.keyToEcTable = undefined;
-    BuildingMapper.mapper = this;
+    this.ecToKeyTable = {};
+    this.keyToDataTable = {};
+    this.keyToEcTable = {};
   }
 
   public async init(imodel: IModelConnection) {
     this.ecToKeyTable = await this.createEcToKeyTable(imodel);
     this.keyToEcTable = this.createKeyToEcTable();
     this.keyToDataTable = this.createKeyToDataTable();
+    BuildingMapper.mapper = this;
   }
 
   public createKeyToEcTable() {
@@ -150,6 +153,10 @@ export class BuildingMapper extends GenericMapper {
     }
 
     return keyToDataTable;
+  }
+
+  getDataObjects(): BuildingDataObject[] {
+    return Object.values(this.keyToDataTable).filter(item => item !== undefined);
   }
 
   // Returns a single object from a ecinstance ID
