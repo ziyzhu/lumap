@@ -6,7 +6,8 @@ import {AccessToken, ConnectClient, IModelQuery, Project, Config} from '@bentley
 import {IModelApp, IModelConnection, FrontendRequestContext, AuthorizedFrontendRequestContext, SpatialViewState, DrawingViewState, Viewport} from '@bentley/imodeljs-frontend';
 import {Presentation, SelectionChangeEventArgs, ISelectionProvider, IFavoritePropertiesStorage, FavoriteProperties, FavoritePropertiesManager} from '@bentley/presentation-frontend';
 // UI
-import {SignIn} from '@bentley/ui-components';
+//import {SignIn} from '@bentley/ui-components';
+import {SignIn} from '../components/SignIn';
 import {Spinner, Position, Intent, Button, IToasterProps, IToastProps, Toaster, ToasterPosition} from '@blueprintjs/core';
 import {SimpleViewportComponent} from '../components/Viewport';
 import Toolbar from '../components/Toolbar';
@@ -307,7 +308,6 @@ class IModelContent extends React.Component<{}, IStateImodelContent> {
     let ui: React.ReactNode;
 
     if (this.state.user.isLoading || window.location.href.includes(this._signInRedirectUri)) {
-      // if user is currently being loaded, just tell that
       ui = (
         <div className="page-center">
           <Spinner size={Spinner.SIZE_STANDARD} />
@@ -315,9 +315,7 @@ class IModelContent extends React.Component<{}, IStateImodelContent> {
         </div>
       );
     } else if (!AppClient.oidcClient.hasSignedIn && !this.state.offlineIModel) {
-      // if user doesn't have an access token, show sign in page
       // Only call with onOffline prop for electron mode since this is not a valid option for Web apps
-      // TODO this step should be bypassed
       if (ElectronRpcConfiguration.isElectron) ui = <SignIn onSignIn={this._onStartSignin} onRegister={this._onRegister} onOffline={this._onOffline} />;
       else ui = <SignIn onSignIn={this._onStartSignin} onRegister={this._onRegister} />;
     } else if (!this.state.imodel || !this.state.viewDefinitionId) {
