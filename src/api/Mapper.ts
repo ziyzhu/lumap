@@ -21,8 +21,8 @@ export interface IBuildingData extends IGenericData {
   latitude: IDynamicValue;
   campus: IDynamicValue;
   buildingType: IDynamicValue;
-  buildingNumber: IDynamicValue;
   address: IDynamicValue;
+  buildingNumber: IDynamicValue;
   about: IDynamicValue;
   dailyPower: IDynamicValue;
   dailyEnergy: IDynamicValue;
@@ -82,8 +82,11 @@ export class BuildingMapper extends GenericMapper {
   public async init(imodel: IModelConnection) {
     this.ecToKeyTable = await this.createEcToKeyTable(imodel);
     this.keyToEcTable = this.createKeyToEcTable();
-    this.keyToDataTable = this.createKeyToDataTable();
+    this.keyToDataTable = await this.createKeyToDataTable();
     BuildingMapper.mapper = this;
+    setInterval(async () => {
+      this.keyToDataTable = await this.createKeyToDataTable();
+    }, 10000);
   }
 
   public createKeyToEcTable() {
@@ -110,15 +113,20 @@ export class BuildingMapper extends GenericMapper {
     return ecToKeyTable;
   }
 
-  // Synchronously creates a matching table: Matching Key => Data Object.
+  // Asynchronously creates a matching table: Matching Key => Data Object.
   // Note; must be called upon construction
-  public createKeyToDataTable() {
+  public async createKeyToDataTable() {
     const keyToDataTable: {[matchingKey: string]: BuildingDataObject} = {};
-    // use external data
-    const bDict: any = require('./PI_Shark_Meter_Read_Snapshot.json');
-    for (const bName in bDict) {
+
+    const responseData = await fetch('http://localhost:5000/v1/pi/buildings'); //require('./PI_Shark_Meter_Read_Snapshot.json');
+    const responseJson: any = await responseData.json();
+    const bDict = responseJson.buildings;
+    console.log(bDict);
+
+    for (const buildingNumber in bDict) {
       // building object
-      const bObject: any = bDict[bName];
+      const bObject: any = bDict[buildingNumber];
+      const buildingName = bObject['BuildingName'];
       // attribute dictionary
       const bAttrDict: {[attrName: string]: IDynamicValue} = {};
 
@@ -134,8 +142,8 @@ export class BuildingMapper extends GenericMapper {
 
       // map original data to class attribute
       const data: IBuildingData = {
-        matchingKey: bAttrDict['BuildingNumber']['value'],
-        buildingName: bName,
+        matchingKey: buildingNumber,
+        buildingName: buildingName,
         yearBuilt: bAttrDict['YearBuilt'],
         monthlyAverageWatts: bAttrDict['Monthly Average Watts'],
         longitude: bAttrDict['Longitude'],
