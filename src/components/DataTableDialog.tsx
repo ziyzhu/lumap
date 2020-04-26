@@ -35,8 +35,8 @@ export class DataTableDialog extends React.Component<IPropDialog, IStateDialog> 
     const {selectedObject} = this.props;
     const {isOpen} = this.state;
     return (
-      <Dialog isOpen={isOpen} icon="home" onClose={this.handleClose} title={selectedObject ? selectedObject.data.buildingName : 'Building Not Found'} {...this.state}>
-        <div className={Classes.DIALOG_BODY}>{selectedObject ? <DataTable buildingData={selectedObject.data} /> : <h2>The data of this building is missing.</h2>}</div>
+      <Dialog style={{width: '660px'}} isOpen={isOpen} icon="home" onClose={this.handleClose} title={selectedObject ? selectedObject.data.buildingName : 'Building Not Found'} {...this.state}>
+        <div className={Classes.DIALOG_BODY}>{selectedObject ? <DataTable selectedObject={selectedObject} /> : <h2>The data of this building is missing.</h2>}</div>
         <div className={Classes.DIALOG_FOOTER}>
           <div className={Classes.DIALOG_FOOTER_ACTIONS}></div>
         </div>
@@ -46,17 +46,27 @@ export class DataTableDialog extends React.Component<IPropDialog, IStateDialog> 
 }
 
 interface IPropTable {
-  buildingData: IBuildingData;
+  selectedObject: BuildingDataObject;
 }
+
 interface IStateTable {}
+
+declare global {
+  interface Window {
+    gapi: any;
+  }
+}
+
 export class DataTable extends React.Component<IPropTable, IStateTable> {
   constructor(props) {
     super(props);
   }
+
   render() {
-    const {buildingData} = this.props;
+    const {data, sheetData} = this.props.selectedObject;
+
     return (
-      <table className="bp3-html-table bp3-interactive">
+      <table className="bp3-html-table bp3-interactive bp3-html-table-striped ">
         <thead>
           <tr>
             <th>Attribute</th>
@@ -67,75 +77,93 @@ export class DataTable extends React.Component<IPropTable, IStateTable> {
           </tr>
         </thead>
         <tbody>
+          {'waterUsage' in sheetData && (
+            <tr>
+              <td>Daily Water Usage</td>
+              <td>{sheetData.waterUsage}</td>
+              <td>{sheetData.waterUsageUnit}</td>
+              <td>{''}</td>
+              <td>{''}</td>
+            </tr>
+          )}
+          {'gasUsage' in sheetData && (
+            <tr>
+              <td>Daily Gas Usage</td>
+              <td>{sheetData.gasUsage}</td>
+              <td>{sheetData.gasUsageUnit}</td>
+              <td>{''}</td>
+              <td>{''}</td>
+            </tr>
+          )}
+          <tr>
+            <td>Daily Power</td>
+            <td>{data.dailyPower.value}</td>
+            <td>{data.dailyPower.unitAbbreviation}</td>
+            <td>{data.dailyPower.timestamp}</td>
+            <td>{data.dailyPower.good === true ? 'Good' : 'Not Good'}</td>
+          </tr>
+          <tr>
+            <td>Daily Eenergy</td>
+            <td>{data.dailyEnergy.value}</td>
+            <td>{data.dailyEnergy.unitAbbreviation}</td>
+            <td>{data.dailyEnergy.timestamp}</td>
+            <td>{data.dailyEnergy.good === true ? 'Good' : 'Not Good'}</td>
+          </tr>
           <tr>
             <td>Year Built</td>
-            <td>{buildingData.yearBuilt.value}</td>
-            <td>{buildingData.yearBuilt.unitAbbreviation}</td>
-            <td>{buildingData.yearBuilt.timestamp}</td>
-            <td>{buildingData.yearBuilt.good === true ? 'Good' : 'Not Good'}</td>
+            <td>{data.yearBuilt.value}</td>
+            <td>{data.yearBuilt.unitAbbreviation}</td>
+            <td>{data.yearBuilt.timestamp}</td>
+            <td>{data.yearBuilt.good === true ? 'Good' : 'Not Good'}</td>
           </tr>
           <tr>
             <td>Longitude</td>
-            <td>{buildingData.longitude.value}</td>
-            <td>{buildingData.longitude.unitAbbreviation}</td>
-            <td>{buildingData.longitude.timestamp}</td>
-            <td>{buildingData.longitude.good === true ? 'Good' : 'Not Good'}</td>
+            <td>{data.longitude.value}</td>
+            <td>{data.longitude.unitAbbreviation}</td>
+            <td>{data.longitude.timestamp}</td>
+            <td>{data.longitude.good === true ? 'Good' : 'Not Good'}</td>
           </tr>
           <tr>
             <td>Latitude</td>
-            <td>{buildingData.latitude.value}</td>
-            <td>{buildingData.latitude.unitAbbreviation}</td>
-            <td>{buildingData.latitude.timestamp}</td>
-            <td>{buildingData.latitude.good === true ? 'Good' : 'Not Good'}</td>
+            <td>{data.latitude.value}</td>
+            <td>{data.latitude.unitAbbreviation}</td>
+            <td>{data.latitude.timestamp}</td>
+            <td>{data.latitude.good === true ? 'Good' : 'Not Good'}</td>
           </tr>
           <tr>
             <td>Campus</td>
-            <td>{buildingData.campus.value}</td>
-            <td>{buildingData.campus.unitAbbreviation}</td>
-            <td>{buildingData.campus.timestamp}</td>
-            <td>{buildingData.campus.good === true ? 'Good' : 'Not Good'}</td>
+            <td>{data.campus.value}</td>
+            <td>{data.campus.unitAbbreviation}</td>
+            <td>{data.campus.timestamp}</td>
+            <td>{data.campus.good === true ? 'Good' : 'Not Good'}</td>
           </tr>
           <tr>
             <td>Building Type</td>
-            <td>{buildingData.buildingType.value}</td>
-            <td>{buildingData.buildingType.unitAbbreviation}</td>
-            <td>{buildingData.buildingType.timestamp}</td>
-            <td>{buildingData.buildingType.good === true ? 'Good' : 'Not Good'}</td>
+            <td>{data.buildingType.value}</td>
+            <td>{data.buildingType.unitAbbreviation}</td>
+            <td>{data.buildingType.timestamp}</td>
+            <td>{data.buildingType.good === true ? 'Good' : 'Not Good'}</td>
           </tr>
           <tr>
             <td>Building Number</td>
-            <td>{buildingData.buildingNumber.value}</td>
-            <td>{buildingData.buildingNumber.unitAbbreviation}</td>
-            <td>{buildingData.buildingNumber.timestamp}</td>
-            <td>{buildingData.buildingNumber.good === true ? 'Good' : 'Not Good'}</td>
+            <td>{data.buildingNumber.value}</td>
+            <td>{data.buildingNumber.unitAbbreviation}</td>
+            <td>{data.buildingNumber.timestamp}</td>
+            <td>{data.buildingNumber.good === true ? 'Good' : 'Not Good'}</td>
           </tr>
           <tr>
             <td>Building Address</td>
-            <td>{buildingData.address.value}</td>
-            <td>{buildingData.address.unitAbbreviation}</td>
-            <td>{buildingData.address.timestamp}</td>
-            <td>{buildingData.address.good === true ? 'Good' : 'Not Good'}</td>
+            <td>{data.address.value}</td>
+            <td>{data.address.unitAbbreviation}</td>
+            <td>{data.address.timestamp}</td>
+            <td>{data.address.good === true ? 'Good' : 'Not Good'}</td>
           </tr>
           <tr>
             <td>Building About</td>
-            <td>{buildingData.about.value}</td>
-            <td>{buildingData.about.unitAbbreviation}</td>
-            <td>{buildingData.about.timestamp}</td>
-            <td>{buildingData.about.good === true ? 'Good' : 'Not Good'}</td>
-          </tr>
-          <tr>
-            <td>Building Daily Power (today)</td>
-            <td>{buildingData.dailyPower.value}</td>
-            <td>{buildingData.dailyPower.unitAbbreviation}</td>
-            <td>{buildingData.dailyPower.timestamp}</td>
-            <td>{buildingData.dailyPower.good === true ? 'Good' : 'Not Good'}</td>
-          </tr>
-          <tr>
-            <td>Building Daily Eenergy (today)</td>
-            <td>{buildingData.dailyEnergy.value}</td>
-            <td>{buildingData.dailyEnergy.unitAbbreviation}</td>
-            <td>{buildingData.dailyEnergy.timestamp}</td>
-            <td>{buildingData.dailyEnergy.good === true ? 'Good' : 'Not Good'}</td>
+            <td>{data.about.value}</td>
+            <td>{data.about.unitAbbreviation}</td>
+            <td>{data.about.timestamp}</td>
+            <td>{data.about.good === true ? 'Good' : 'Not Good'}</td>
           </tr>
         </tbody>
       </table>

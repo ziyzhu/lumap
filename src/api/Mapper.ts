@@ -1,4 +1,5 @@
 import {IModelConnection} from '@bentley/imodeljs-frontend';
+import GoogleConfig from '../api/GoogleConfig';
 
 interface IGenericData {
   matchingKey: string;
@@ -28,6 +29,15 @@ export interface IBuildingData extends IGenericData {
   dailyEnergy: IDynamicValue;
 }
 
+export interface ISheetData extends IGenericData {
+  buildingNumber: string;
+  buildingName: string;
+  waterUsage: string;
+  waterUsageUnit: string;
+  gasUsage: string;
+  gasUsageUnit: string;
+}
+
 export class GenericDataObject {
   key: string;
   data: IGenericData;
@@ -39,10 +49,12 @@ export class GenericDataObject {
 
 export class BuildingDataObject extends GenericDataObject {
   data: IBuildingData;
+  sheetData: ISheetData | {};
   constructor(key: string, data: IBuildingData) {
     super(key, data);
     this.key = key;
     this.data = data;
+    this.sheetData = {};
   }
 }
 
@@ -57,7 +69,6 @@ abstract class GenericMapper {
     this.keyToDataTable = {};
     this.keyToEcTable = {};
     GenericMapper.mapper = this;
-    console.log(this);
   }
 
   // Asynchronously returns the queried rows
@@ -84,9 +95,18 @@ export class BuildingMapper extends GenericMapper {
     this.keyToEcTable = this.createKeyToEcTable();
     this.keyToDataTable = await this.createKeyToDataTable();
     BuildingMapper.mapper = this;
+    this.pushSheetData();
     setInterval(async () => {
       this.keyToDataTable = await this.createKeyToDataTable();
+      this.pushSheetData();
+      console.log(this.keyToDataTable);
     }, 10000);
+  }
+
+  public mergeData(sheetData: ISheetData) {
+    if (this.keyToDataTable[sheetData.matchingKey]) {
+      this.keyToDataTable[sheetData.matchingKey].sheetData = sheetData;
+    }
   }
 
   public createKeyToEcTable() {
@@ -121,7 +141,6 @@ export class BuildingMapper extends GenericMapper {
     const responseData = await fetch('http://localhost:5000/v1/pi/buildings'); //require('./PI_Shark_Meter_Read_Snapshot.json');
     const responseJson: any = await responseData.json();
     const bDict = responseJson.buildings;
-    console.log(bDict);
 
     for (const buildingNumber in bDict) {
       // building object
@@ -192,4 +211,58 @@ export class BuildingMapper extends GenericMapper {
   getEcFromKey(matchingKey: string) {
     return this.keyToEcTable[matchingKey];
   }
+
+  pushSheetData() {
+    const handler = (response, error) => {
+      console.log('Error: ' + JSON.stringify(error));
+
+      const sheetData = response.data;
+      let dataItems: ISheetData[] = [];
+
+      sheetData.slice(1).forEach(row => {
+        const dataItem: ISheetData = {
+          matchingKey: row[1],
+          buildingName: row[0],
+          buildingNumber: row[1],
+          waterUsage: row[2],
+          waterUsageUnit: row[3],
+          gasUsage: row[4],
+          gasUsageUnit: row[5],
+        };
+        //dataItems.push(dataItem);
+        this.mergeData(dataItem);
+      });
+    };
+
+    const initClient = () => {
+      window.gapi.client
+        .init({
+          apiKey: GoogleConfig.apiKey,
+          discoveryDocs: GoogleConfig.discoveryDocs,
+        })
+        .then(() => {
+          load(handler);
+        });
+    };
+    window.gapi.load('client', initClient);
+  }
+}
+
+function load(callback) {
+  window.gapi.client.load('sheets', 'v4', () => {
+    window.gapi.client.sheets.spreadsheets.values
+      .get({
+        spreadsheetId: GoogleConfig.spreadsheetId,
+        range: 'Sheet1!A1:T',
+      })
+      .then(
+        response => {
+          const data = response.result.values;
+          callback({data});
+        },
+        response => {
+          callback(false, response.result.error);
+        },
+      );
+  });
 }
