@@ -138,9 +138,15 @@ export class BuildingMapper extends GenericMapper {
   public async createKeyToDataTable() {
     const keyToDataTable: {[matchingKey: string]: BuildingDataObject} = {};
 
-    const responseData = await fetch('http://localhost:5000/v1/pi/buildings'); //require('./PI_Shark_Meter_Read_Snapshot.json');
-    const responseJson: any = await responseData.json();
-    const bDict = responseJson.buildings;
+    let bDict;
+    try {
+      const responseData = await fetch('http://128.180.6.49:5000/v1/pi/buildings');
+      const responseJson: any = await responseData.json();
+      bDict = responseJson.buildings;
+    } catch (err) {
+      const backupData = require('./PI_DATA_SNAPSHOT.json');
+      bDict = backupData.buildings;
+    }
 
     for (const buildingNumber in bDict) {
       // building object
