@@ -100,7 +100,7 @@ export class BuildingMapper extends GenericMapper {
       this.keyToDataTable = await this.createKeyToDataTable();
       this.pushSheetData();
       console.log(this.keyToDataTable);
-    }, 10000);
+    }, 1800000);
   }
 
   public mergeData(sheetData: ISheetData) {
