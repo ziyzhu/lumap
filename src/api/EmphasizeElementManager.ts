@@ -1,11 +1,13 @@
-import {IModelApp, EmphasizeElements, ScreenViewport, FeatureOverrideType} from '@bentley/imodeljs-frontend';
+import {SelectionSet, IModelApp, EmphasizeElements, ScreenViewport, FeatureOverrideType} from '@bentley/imodeljs-frontend';
 import {ColorDef} from '@bentley/imodeljs-common';
 
 export enum ActionType {
   Emphasize = 'Emphasize',
   Isolate = 'Isolate',
   Hide = 'Hide',
-  Override = 'Color',
+  ColorRed = 'ColorRed',
+  ColorBlue = 'ColorBlue',
+  Clear = 'Clear',
 }
 
 abstract class EmphasizeActionBase {
@@ -94,7 +96,13 @@ class ClearOverrideAction extends EmphasizeActionBase {
 }
 
 export class EmphasizeElementManager {
-  static runAction = (type: ActionType) => {
+  static current: EmphasizeElementManager;
+  public selectionSet: SelectionSet;
+  constructor(selectionSet: SelectionSet) {
+    this.selectionSet = selectionSet;
+    EmphasizeElementManager.current = this;
+  }
+  public runAction = (type: ActionType) => {
     switch (type) {
       default:
       case ActionType.Emphasize: {
@@ -112,8 +120,18 @@ export class EmphasizeElementManager {
         action.run();
         break;
       }
-      case ActionType.Override: {
+      case ActionType.ColorRed: {
         const action = new OverrideAction(ColorDef.red);
+        action.run();
+        break;
+      }
+      case ActionType.ColorBlue: {
+        const action = new OverrideAction(ColorDef.blue);
+        action.run();
+        break;
+      }
+      case ActionType.Clear: {
+        const action = new ClearOverrideAction();
         action.run();
         break;
       }

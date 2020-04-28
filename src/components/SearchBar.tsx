@@ -1,8 +1,9 @@
 import * as React from 'react';
-import {Button, H5, Intent, ITagProps, MenuItem, Switch} from '@blueprintjs/core';
+import {Button, ButtonGroup, H5, Intent, Classes, ITagProps, MenuItem, Switch, Card, Elevation} from '@blueprintjs/core';
 import {ItemPredicate, ItemRenderer, MultiSelect} from '@blueprintjs/select';
 import {IBuildingData, BuildingMapper, BuildingDataObject} from '../api/Mapper';
 import {areBuildingsEqual, arrayContainsBuilding} from '../api/buildings';
+import {UserEvent, handleUserEvent} from '../api/UserEvent';
 
 const BuildingMultiSelect = MultiSelect.ofType<IBuildingData>();
 
@@ -112,24 +113,59 @@ export class SearchBar extends React.Component<{}, IState> {
   render() {
     const clearButton = this.state.buildings.length > 0 ? <Button icon="cross" minimal={true} onClick={this.handleClear} /> : undefined;
     return (
-      <div className="container" style={{justifyContent: 'center'}}>
-        <BuildingMultiSelect
-          placeholder={'Select multiple buildings...'}
-          resetOnSelect={true}
-          fill={true}
-          itemsEqual={areBuildingsEqual}
-          popoverProps={{minimal: false}}
-          itemRenderer={this.renderBuilding}
-          items={this.state.items}
-          noResults={<MenuItem disabled={true} text="No results." />}
-          selectedItems={this.state.buildings}
-          onItemSelect={this.handleBuildingSelect}
-          onItemsPaste={this.handleBuildingsPaste}
-          tagRenderer={this.renderTag}
-          tagInputProps={{onRemove: this.handleTagRemove, rightElement: clearButton}}
-          itemPredicate={this.filterBuilding}
-        />
-      </div>
+      <>
+        <div className="container" style={{justifyContent: 'center'}}>
+          <BuildingMultiSelect
+            placeholder={'Select multiple buildings...'}
+            resetOnSelect={true}
+            fill={true}
+            itemsEqual={areBuildingsEqual}
+            popoverProps={{minimal: false}}
+            itemRenderer={this.renderBuilding}
+            items={this.state.items}
+            noResults={<MenuItem disabled={true} text="No results." />}
+            selectedItems={this.state.buildings}
+            onItemSelect={this.handleBuildingSelect}
+            onItemsPaste={this.handleBuildingsPaste}
+            tagRenderer={this.renderTag}
+            tagInputProps={{onRemove: this.handleTagRemove, rightElement: clearButton}}
+            itemPredicate={this.filterBuilding}
+          />
+        </div>
+        <div className="container" style={{display: 'block'}}>
+          {this.state.buildings.map(building => (
+            <Card key={building.buildingNumber.value} style={{marginBottom: '10px'}}>
+              <H5>
+                <a href="#">{building.buildingName}</a>
+              </H5>
+              <p>{building.address.value}</p>
+              <ButtonGroup style={{minWidth: 200}}>
+                <Button
+                  text="Zoom In"
+                  onClick={() => {
+                    handleUserEvent(building.matchingKey, UserEvent.ZoomIn);
+                  }}
+                  className={Classes.BUTTON}
+                />
+                <Button
+                  text="Highlight"
+                  onClick={() => {
+                    handleUserEvent(building.matchingKey, UserEvent.Highlight);
+                  }}
+                  className={Classes.BUTTON}
+                />
+                <Button
+                  text="Clear"
+                  onClick={() => {
+                    handleUserEvent(building.matchingKey, UserEvent.Clear);
+                  }}
+                  className={Classes.BUTTON}
+                />
+              </ButtonGroup>
+            </Card>
+          ))}
+        </div>
+      </>
     );
   }
 }
