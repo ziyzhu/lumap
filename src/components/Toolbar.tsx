@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {IModelApp, ZoomViewTool, PanViewTool, RotateViewTool, SelectionTool, FitViewTool} from '@bentley/imodeljs-frontend';
+import {Icon} from '@blueprintjs/core';
 
 import './Toolbar.css';
 
@@ -8,19 +9,29 @@ const toolbar = () => {
   return (
     <div className="toolbar">
       <a href="#" title={SelectionTool.flyover} onClick={select}>
-        <span className="icon icon-cursor"></span>
+        <span>
+          <Icon icon="select" />
+        </span>
       </a>
       <a href="#" title={FitViewTool.flyover} onClick={fitView}>
-        <span className="icon icon-fit-to-view"></span>
+        <span>
+          <Icon icon="zoom-to-fit" />
+        </span>
       </a>
       <a href="#" title={RotateViewTool.flyover} onClick={rotate}>
-        <span className="icon icon-gyroscope"></span>
+        <span>
+          <Icon icon="pivot-table" />
+        </span>
       </a>
       <a href="#" title={PanViewTool.flyover} onClick={pan}>
-        <span className="icon icon-hand-2"></span>
+        <span>
+          <Icon icon="hand" />
+        </span>
       </a>
       <a href="#" title={ZoomViewTool.flyover} onClick={zoom}>
-        <span className="icon icon-zoom"></span>
+        <span>
+          <Icon icon="search" />
+        </span>
       </a>
     </div>
   );

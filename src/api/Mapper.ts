@@ -1,4 +1,5 @@
 import {IModelConnection} from '@bentley/imodeljs-frontend';
+import GoogleConfig from '../api/GoogleConfig';
 
 interface IGenericData {
   matchingKey: string;
@@ -21,11 +22,20 @@ export interface IBuildingData extends IGenericData {
   latitude: IDynamicValue;
   campus: IDynamicValue;
   buildingType: IDynamicValue;
-  buildingNumber: IDynamicValue;
   address: IDynamicValue;
+  buildingNumber: IDynamicValue;
   about: IDynamicValue;
   dailyPower: IDynamicValue;
   dailyEnergy: IDynamicValue;
+}
+
+export interface ISheetData extends IGenericData {
+  buildingNumber: string;
+  buildingName: string;
+  waterUsage: string;
+  waterUsageUnit: string;
+  gasUsage: string;
+  gasUsageUnit: string;
 }
 
 export class GenericDataObject {
@@ -39,10 +49,12 @@ export class GenericDataObject {
 
 export class BuildingDataObject extends GenericDataObject {
   data: IBuildingData;
+  sheetData: ISheetData | {};
   constructor(key: string, data: IBuildingData) {
     super(key, data);
     this.key = key;
     this.data = data;
+    this.sheetData = {};
   }
 }
 
@@ -57,7 +69,6 @@ abstract class GenericMapper {
     this.keyToDataTable = {};
     this.keyToEcTable = {};
     GenericMapper.mapper = this;
-    console.log(this);
   }
 
   // Asynchronously returns the queried rows
@@ -82,8 +93,20 @@ export class BuildingMapper extends GenericMapper {
   public async init(imodel: IModelConnection) {
     this.ecToKeyTable = await this.createEcToKeyTable(imodel);
     this.keyToEcTable = this.createKeyToEcTable();
-    this.keyToDataTable = this.createKeyToDataTable();
+    this.keyToDataTable = await this.createKeyToDataTable();
     BuildingMapper.mapper = this;
+    this.pushSheetData();
+    setInterval(async () => {
+      this.keyToDataTable = await this.createKeyToDataTable();
+      this.pushSheetData();
+      console.log(this.keyToDataTable);
+    }, 1800000);
+  }
+
+  public mergeData(sheetData: ISheetData) {
+    if (this.keyToDataTable[sheetData.matchingKey]) {
+      this.keyToDataTable[sheetData.matchingKey].sheetData = sheetData;
+    }
   }
 
   public createKeyToEcTable() {
@@ -110,15 +133,25 @@ export class BuildingMapper extends GenericMapper {
     return ecToKeyTable;
   }
 
-  // Synchronously creates a matching table: Matching Key => Data Object.
+  // Asynchronously creates a matching table: Matching Key => Data Object.
   // Note; must be called upon construction
-  public createKeyToDataTable() {
+  public async createKeyToDataTable() {
     const keyToDataTable: {[matchingKey: string]: BuildingDataObject} = {};
-    // use external data
-    const bDict: any = require('./PI_Shark_Meter_Read_Snapshot.json');
-    for (const bName in bDict) {
+
+    let bDict;
+    try {
+      const responseData = await fetch('http://128.180.6.49:5000/api/v1/pi/buildings');
+      const responseJson: any = await responseData.json();
+      bDict = responseJson.buildings;
+    } catch (err) {
+      const backupData = require('./PI_DATA_SNAPSHOT.json');
+      bDict = backupData.buildings;
+    }
+
+    for (const buildingNumber in bDict) {
       // building object
-      const bObject: any = bDict[bName];
+      const bObject: any = bDict[buildingNumber];
+      const buildingName = bObject['BuildingName'];
       // attribute dictionary
       const bAttrDict: {[attrName: string]: IDynamicValue} = {};
 
@@ -134,8 +167,8 @@ export class BuildingMapper extends GenericMapper {
 
       // map original data to class attribute
       const data: IBuildingData = {
-        matchingKey: bAttrDict['BuildingNumber']['value'],
-        buildingName: bName,
+        matchingKey: buildingNumber,
+        buildingName: buildingName,
         yearBuilt: bAttrDict['YearBuilt'],
         monthlyAverageWatts: bAttrDict['Monthly Average Watts'],
         longitude: bAttrDict['Longitude'],
@@ -184,4 +217,58 @@ export class BuildingMapper extends GenericMapper {
   getEcFromKey(matchingKey: string) {
     return this.keyToEcTable[matchingKey];
   }
+
+  pushSheetData() {
+    const handler = (response, error) => {
+      console.log('Error: ' + JSON.stringify(error));
+
+      const sheetData = response.data;
+      let dataItems: ISheetData[] = [];
+
+      sheetData.slice(1).forEach(row => {
+        const dataItem: ISheetData = {
+          matchingKey: row[1],
+          buildingName: row[0],
+          buildingNumber: row[1],
+          waterUsage: row[2],
+          waterUsageUnit: row[3],
+          gasUsage: row[4],
+          gasUsageUnit: row[5],
+        };
+        //dataItems.push(dataItem);
+        this.mergeData(dataItem);
+      });
+    };
+
+    const initClient = () => {
+      window.gapi.client
+        .init({
+          apiKey: GoogleConfig.apiKey,
+          discoveryDocs: GoogleConfig.discoveryDocs,
+        })
+        .then(() => {
+          load(handler);
+        });
+    };
+    window.gapi.load('client', initClient);
+  }
+}
+
+function load(callback) {
+  window.gapi.client.load('sheets', 'v4', () => {
+    window.gapi.client.sheets.spreadsheets.values
+      .get({
+        spreadsheetId: GoogleConfig.spreadsheetId,
+        range: 'Sheet1!A1:T',
+      })
+      .then(
+        response => {
+          const data = response.result.values;
+          callback({data});
+        },
+        response => {
+          callback(false, response.result.error);
+        },
+      );
+  });
 }
