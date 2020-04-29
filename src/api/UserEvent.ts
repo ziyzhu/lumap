@@ -6,7 +6,6 @@ import {ColorDef} from '@bentley/imodeljs-common';
 export enum UserEvent {
   ZoomIn,
   Highlight,
-  Select,
   Isolate,
   Clear,
   // more events will be supported
@@ -33,15 +32,11 @@ export const handleUserEvent = (matchingKey: string, event: UserEvent) => {
     case UserEvent.Highlight:
       emph.overrideElements(ecId, viewport, ColorDef.red);
       break;
-    case UserEvent.Select:
-      manager.selectionSet.add(ecId);
-      break;
     case UserEvent.Isolate:
       emph.isolateElements(ecId, viewport);
       break;
     case UserEvent.Clear:
       EmphasizeElements.clear(viewport);
-      manager.selectionSet.remove(ecId);
       break;
 
     default:

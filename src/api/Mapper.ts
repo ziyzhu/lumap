@@ -99,7 +99,6 @@ export class BuildingMapper extends GenericMapper {
     setInterval(async () => {
       this.keyToDataTable = await this.createKeyToDataTable();
       this.pushSheetData();
-      console.log(this.keyToDataTable);
     }, 1800000);
   }
 
@@ -140,7 +139,7 @@ export class BuildingMapper extends GenericMapper {
 
     let bDict;
     try {
-      const responseData = await fetch('http://128.180.6.49:5000/api/v1/pi/buildings');
+      const responseData = await fetch('https://128.180.6.49:5000/api/v1/pi/buildings');
       const responseJson: any = await responseData.json();
       bDict = responseJson.buildings;
     } catch (err) {
@@ -193,6 +192,10 @@ export class BuildingMapper extends GenericMapper {
 
   getDataObjects(): BuildingDataObject[] {
     return Object.values(this.keyToDataTable).filter(item => item !== undefined);
+  }
+
+  getDataFromKey(matchingKey: string): BuildingDataObject {
+    return this.keyToDataTable[matchingKey];
   }
 
   // Returns a single object from a ecinstance ID

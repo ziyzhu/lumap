@@ -30,34 +30,6 @@ export default class DrawerComponent extends React.Component<IProps> {
   render() {
     // TODO currently used for demo purposes
     const selectedObjects = this.props.selectedObjects;
-    let objStrings;
-    if (selectedObjects && selectedObjects.length > 0) {
-      objStrings = (
-        <>
-          {selectedObjects.map(obj =>
-            obj ? (
-              <>
-                <p key={obj.data.matchingKey}>
-                  <Button onClick={() => handleUserEvent(obj.data.matchingKey, UserEvent.ZoomIn)}>Zoom In</Button>
-                  {Object.keys(obj.data).map(k => (
-                    <>
-                      <p>{k + ': ' + (typeof obj.data[k] === 'string' ? obj.data[k] : obj.data[k].value)}</p>
-                    </>
-                  ))}
-                </p>
-                <p> ---- </p>
-              </>
-            ) : (
-              <>
-                'undefined building'
-                <p> ---- </p>
-              </>
-            ),
-          )}
-        </>
-      );
-    }
-    // end
 
     return (
       <>

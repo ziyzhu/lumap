@@ -4,12 +4,15 @@ import {ItemPredicate, ItemRenderer, MultiSelect} from '@blueprintjs/select';
 import {IBuildingData, BuildingMapper, BuildingDataObject} from '../api/Mapper';
 import {areBuildingsEqual, arrayContainsBuilding} from '../api/buildings';
 import {UserEvent, handleUserEvent} from '../api/UserEvent';
+import {DataTableDialog} from '../components/DataTableDialog';
 
 const BuildingMultiSelect = MultiSelect.ofType<IBuildingData>();
 
 interface IState {
   buildings: IBuildingData[];
   items: IBuildingData[];
+  dataTableIsOpen: boolean;
+  dataTableKey: string;
 }
 
 export class SearchBar extends React.Component<{}, IState> {
@@ -18,11 +21,14 @@ export class SearchBar extends React.Component<{}, IState> {
     this.state = {
       buildings: [],
       items: [],
+      dataTableIsOpen: false,
+      dataTableKey: '',
     };
   }
 
   componentDidMount() {
-    this.setState({items: BuildingMapper.mapper.getDataObjects().map(obj => obj.data)});
+    const dataObjects: BuildingDataObject[] = BuildingMapper.mapper.getDataObjects();
+    this.setState({items: dataObjects.map(obj => obj.data)});
   }
 
   private getSelectedBuildingIndex(selectedBuilding: IBuildingData) {
@@ -109,9 +115,11 @@ export class SearchBar extends React.Component<{}, IState> {
       return `${normalizedName}. ${building.yearBuilt.value}`.indexOf(normalizedQuery) >= 0;
     }
   };
+  private handleDialogClose = () => this.setState({dataTableIsOpen: false});
 
   render() {
     const clearButton = this.state.buildings.length > 0 ? <Button icon="cross" minimal={true} onClick={this.handleClear} /> : undefined;
+    const mapper = BuildingMapper.mapper;
     return (
       <>
         <div className="container" style={{justifyContent: 'center'}}>
@@ -136,7 +144,13 @@ export class SearchBar extends React.Component<{}, IState> {
           {this.state.buildings.map(building => (
             <Card key={building.buildingNumber.value} style={{marginBottom: '10px'}}>
               <H5>
-                <a href="#">{building.buildingName}</a>
+                <a
+                  href="#"
+                  onClick={() => {
+                    this.setState({dataTableIsOpen: true, dataTableKey: building.matchingKey});
+                  }}>
+                  {building.buildingName}
+                </a>
               </H5>
               <p>{building.address.value}</p>
               <ButtonGroup style={{minWidth: 200}}>
@@ -151,13 +165,6 @@ export class SearchBar extends React.Component<{}, IState> {
                   text="Highlight"
                   onClick={() => {
                     handleUserEvent(building.matchingKey, UserEvent.Highlight);
-                  }}
-                  className={Classes.BUTTON}
-                />
-                <Button
-                  text="Select"
-                  onClick={() => {
-                    handleUserEvent(building.matchingKey, UserEvent.Select);
                   }}
                   className={Classes.BUTTON}
                 />
@@ -178,6 +185,7 @@ export class SearchBar extends React.Component<{}, IState> {
               </ButtonGroup>
             </Card>
           ))}
+          <DataTableDialog handleClose={this.handleDialogClose} isOpen={this.state.dataTableIsOpen} selectedObject={mapper.getDataFromKey(this.state.dataTableKey)} />
         </div>
       </>
     );
