@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Button, ButtonGroup, H5, Intent, Classes, ITagProps, MenuItem, Switch, Card, Elevation} from '@blueprintjs/core';
+import {Card, ButtonGroup, Classes, Button, H5, Intent, ITagProps, MenuItem, Switch} from '@blueprintjs/core';
 import {ItemPredicate, ItemRenderer, MultiSelect} from '@blueprintjs/select';
 import {IBuildingData, BuildingMapper, BuildingDataObject} from '../api/Mapper';
 import {areBuildingsEqual, arrayContainsBuilding} from '../api/buildings';
@@ -151,6 +151,20 @@ export class SearchBar extends React.Component<{}, IState> {
                   text="Highlight"
                   onClick={() => {
                     handleUserEvent(building.matchingKey, UserEvent.Highlight);
+                  }}
+                  className={Classes.BUTTON}
+                />
+                <Button
+                  text="Select"
+                  onClick={() => {
+                    handleUserEvent(building.matchingKey, UserEvent.Select);
+                  }}
+                  className={Classes.BUTTON}
+                />
+                <Button
+                  text="Isolate"
+                  onClick={() => {
+                    handleUserEvent(building.matchingKey, UserEvent.Isolate);
                   }}
                   className={Classes.BUTTON}
                 />

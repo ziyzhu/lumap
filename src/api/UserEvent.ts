@@ -1,10 +1,13 @@
 import {IModelApp, EmphasizeElements} from '@bentley/imodeljs-frontend';
 import {BuildingMapper} from '../api/Mapper';
 import {EmphasizeElementManager, ActionType} from '../api/EmphasizeElementManager';
+import {ColorDef} from '@bentley/imodeljs-common';
 
 export enum UserEvent {
   ZoomIn,
   Highlight,
+  Select,
+  Isolate,
   Clear,
   // more events will be supported
 }
@@ -13,25 +16,32 @@ export enum UserEvent {
  * Handles callbacks for all types of user event
  */
 export const handleUserEvent = (matchingKey: string, event: UserEvent) => {
+  if (!IModelApp || !IModelApp.viewManager || !IModelApp.viewManager.selectedView || !BuildingMapper.mapper) {
+    return;
+  }
+
   const buildingMapper = BuildingMapper.mapper;
   const ecId = buildingMapper.getEcFromKey(matchingKey);
   const manager = EmphasizeElementManager.current;
+  const viewport = IModelApp.viewManager.selectedView;
+  const emph = EmphasizeElements.getOrCreate(viewport);
+
   switch (event) {
     case UserEvent.ZoomIn:
-      if (IModelApp && IModelApp.viewManager && IModelApp.viewManager.selectedView && BuildingMapper.mapper) {
-        const viewport = IModelApp.viewManager.selectedView;
-        viewport.zoomToElements(ecId);
-      }
+      viewport.zoomToElements(ecId, {animateFrustumChange: true});
       break;
     case UserEvent.Highlight:
-      manager.selectionSet.emptyAll();
+      emph.overrideElements(ecId, viewport, ColorDef.red);
+      break;
+    case UserEvent.Select:
       manager.selectionSet.add(ecId);
-      manager.runAction(ActionType.ColorRed);
+      break;
+    case UserEvent.Isolate:
+      emph.isolateElements(ecId, viewport);
       break;
     case UserEvent.Clear:
-      manager.selectionSet.emptyAll();
-      manager.selectionSet.add(ecId);
-      manager.runAction(ActionType.ColorBlue);
+      EmphasizeElements.clear(viewport);
+      manager.selectionSet.remove(ecId);
       break;
 
     default:
