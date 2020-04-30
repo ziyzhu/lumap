@@ -83,7 +83,7 @@ class IModelContent extends React.Component<{}, IStateImodelContent> {
     };
     IModelApp.viewManager.onViewOpen.addOnce(vp => {
       //vp.changeBackgroundMapProps({applyTerrain:true});
-      vp.changeBackgroundMapProps({groundBias:-100});
+      //vp.changeBackgroundMapProps({groundBias:-100});
 
       const viewFlags = vp.viewFlags.clone();
       viewFlags.shadows = false;
