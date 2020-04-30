@@ -34,7 +34,8 @@ const toolbar = () => {
         </span>
       </a>
       <a href="#" title={StandardViewTool.flyover} onClick={standard}>
-        <span className="icon icon-fit-to-view">
+        <span> 
+          <Icon icon = "locate" />
         </span>
       </a>
 
