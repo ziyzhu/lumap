@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {IModelApp, ZoomViewTool, PanViewTool, RotateViewTool, SelectionTool, FitViewTool} from '@bentley/imodeljs-frontend';
+import {IModelApp, ZoomViewTool, PanViewTool, RotateViewTool, SelectionTool, FitViewTool,StandardViewTool} from '@bentley/imodeljs-frontend';
 import {Icon} from '@blueprintjs/core';
 
 import './Toolbar.css';
@@ -33,6 +33,11 @@ const toolbar = () => {
           <Icon icon="search" />
         </span>
       </a>
+      <a href="#" title={StandardViewTool.flyover} onClick={standard}>
+        <span className="icon icon-fit-to-view">
+        </span>
+      </a>
+
     </div>
   );
 };
@@ -62,4 +67,7 @@ const zoom = () => {
   IModelApp.tools.run(ZoomViewTool.toolId, IModelApp.viewManager.selectedView);
 };
 
+const standard = () => {
+  IModelApp.tools.run(StandardViewTool.toolId, IModelApp.viewManager.selectedView);
+};
 export default toolbar;
