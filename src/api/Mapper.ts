@@ -139,7 +139,7 @@ export class BuildingMapper extends GenericMapper {
 
     let bDict;
     try {
-      const responseData = await fetch('https://128.180.6.49:5000/api/v1/pi/buildings');
+      const responseData = await fetch('https://lehighmap.csb.lehigh.edu:5000/api/v1/pi/buildings');
       const responseJson: any = await responseData.json();
       bDict = responseJson.buildings;
     } catch (err) {
