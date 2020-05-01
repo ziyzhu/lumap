@@ -36,6 +36,8 @@ export interface ISheetData extends IGenericData {
   waterUsageUnit: string;
   gasUsage: string;
   gasUsageUnit: string;
+  timestamp: string;
+  condition: string;
 }
 
 export class GenericDataObject {
@@ -237,6 +239,8 @@ export class BuildingMapper extends GenericMapper {
           waterUsageUnit: row[3],
           gasUsage: row[4],
           gasUsageUnit: row[5],
+          timestamp: row[6],
+          condition: row[7],
         };
         //dataItems.push(dataItem);
         this.mergeData(dataItem);

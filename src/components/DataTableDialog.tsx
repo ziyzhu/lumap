@@ -82,8 +82,8 @@ export class DataTable extends React.Component<IPropTable, IStateTable> {
               <td>Daily Water Usage</td>
               <td>{sheetData.waterUsage}</td>
               <td>{sheetData.waterUsageUnit}</td>
-              <td>{''}</td>
-              <td>{''}</td>
+              <td>{sheetData.timestamp}</td>
+              <td>{sheetData.condition}</td>
             </tr>
           )}
           {'gasUsage' in sheetData && (
@@ -91,8 +91,8 @@ export class DataTable extends React.Component<IPropTable, IStateTable> {
               <td>Daily Gas Usage</td>
               <td>{sheetData.gasUsage}</td>
               <td>{sheetData.gasUsageUnit}</td>
-              <td>{''}</td>
-              <td>{''}</td>
+              <td>{sheetData.timestamp}</td>
+              <td>{sheetData.condition}</td>
             </tr>
           )}
           <tr>
