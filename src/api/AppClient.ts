@@ -1,5 +1,6 @@
-import {Logger, LogLevel} from '@bentley/bentleyjs-core';
+import {Logger, LogLevel, ClientRequestContext} from '@bentley/bentleyjs-core';
 import {OidcFrontendClientConfiguration, IOidcFrontendClient, Config, UrlDiscoveryClient} from '@bentley/imodeljs-clients';
+import { BrowserAuthorizationCallbackHandler, BrowserAuthorizationClient, BrowserAuthorizationClientConfiguration } from "@bentley/frontend-authorization-client";
 import {IModelApp, OidcBrowserClient, FrontendRequestContext} from '@bentley/imodeljs-frontend';
 import {BentleyCloudRpcManager, BentleyCloudRpcParams} from '@bentley/imodeljs-common';
 import {RpcInterfaceDefinition, IModelReadRpcInterface, IModelTileRpcInterface, SnapshotIModelRpcInterface} from '@bentley/imodeljs-common';
@@ -8,55 +9,32 @@ import {Presentation} from '@bentley/presentation-frontend';
 import {UiComponents} from '@bentley/ui-components';
 import * as AppConfig from './AppConfig.json';
 
-/**
- ** Returns a list of RPCs supported by this application
- **/
 export function getSupportedRpcs(): RpcInterfaceDefinition[] {
   return [IModelReadRpcInterface, IModelTileRpcInterface, PresentationRpcInterface, SnapshotIModelRpcInterface];
 }
 
-// Boiler plate code
 export class AppClient {
-  private static _isReady: Promise<void>;
-  private static _oidcClient: IOidcFrontendClient;
-
-  public static get oidcClient() {
-    return this._oidcClient;
-  }
-
-  public static get ready(): Promise<void> {
+  private static _isReady: Promise<Boolean>;
+  public static get oidcClient() { return IModelApp.authorizationClient!; }
+  public static get ready(): Promise<Boolean> {
     return this._isReady;
   }
-
-  public static startup() {
-    IModelApp.startup();
-
-    // contains various initialization promises which need
-    // to be fulfilled before the app is ready
+  public static async startup() {
+    await IModelApp.startup();
+    await AppClient.initializeOidc();
     const initPromises = new Array<Promise<any>>();
-
-    // initialize UiComponents
     initPromises.push(UiComponents.initialize(IModelApp.i18n));
-
-    // initialize Presentation
     Presentation.initialize({
       activeLocale: IModelApp.i18n.languageList()[0],
     });
-
-    // initialize RPC communication
     initPromises.push(AppClient.initializeRpc());
-
-    // initialize OIDC
     initPromises.push(AppClient.initializeOidc());
-
-    // the app is ready when all initialization promises are fulfilled
-    this._isReady = Promise.all(initPromises).then(() => {});
+    return Promise.all(initPromises);
   }
 
   private static async initializeRpc(): Promise<void> {
     let rpcParams = await this.getConnectionInfo();
     const rpcInterfaces = getSupportedRpcs();
-    // initialize RPC for web apps
     if (!rpcParams) rpcParams = {info: {title: 'basic-viewport-app', version: 'v1.0'}, uriPrefix: 'http://localhost:3001'};
     BentleyCloudRpcManager.initializeClient(rpcParams, rpcInterfaces);
   }
@@ -65,26 +43,26 @@ export class AppClient {
     const clientId = AppConfig.imjs_browser_client_id;
     const redirectUri = AppConfig.imjs_browser_redirect_uri;
     const scope = AppConfig.imjs_browser_scope;
-    const responseType = 'code';
-    const oidcConfig: OidcFrontendClientConfiguration = {clientId, redirectUri, scope, responseType};
-
-    this._oidcClient = new OidcBrowserClient(oidcConfig);
-
-    const requestContext = new FrontendRequestContext();
-    await this._oidcClient.initialize(requestContext);
-
-    IModelApp.authorizationClient = this._oidcClient;
+    const postSignoutRedirectUri = "";
+    const oidcConfiguration: BrowserAuthorizationClientConfiguration = { clientId, redirectUri, postSignoutRedirectUri, scope: scope + " imodeljs-router", responseType: "code" };
+      await BrowserAuthorizationCallbackHandler.handleSigninCallback(oidcConfiguration.redirectUri);
+      IModelApp.authorizationClient = new BrowserAuthorizationClient(oidcConfiguration);
+      try {
+        await (AppClient.oidcClient as BrowserAuthorizationClient).signInSilent(new ClientRequestContext());
+      } catch (err) { 
+        console.log(err);
+      }
   }
 
   private static async getConnectionInfo(): Promise<BentleyCloudRpcParams | undefined> {
     const urlClient = new UrlDiscoveryClient();
     const requestContext = new FrontendRequestContext();
     const orchestratorUrl = await urlClient.discoverUrl(requestContext, 'iModelJsOrchestrator.K8S', undefined);
-    return {info: {title: 'general-purpose-imodeljs-backend', version: 'v1.0'}, uriPrefix: orchestratorUrl};
+    return {info: {title: 'general-purpose-imodeljs-backend', version: 'v2.0'}, uriPrefix: orchestratorUrl};
   }
 
   public static shutdown() {
-    this._oidcClient.dispose();
+    // this._oidcClient.dispose();
     IModelApp.shutdown();
   }
 }

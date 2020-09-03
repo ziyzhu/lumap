@@ -15,8 +15,6 @@ interface IProps {
   imodel: IModelConnection;
   /** View definition to use when the viewport is first loaded */
   viewDefinitionId: Id64String;
-  /** ID of the presentation rule set to use for unified selection */
-  rulesetId: string;
 }
 
 /** Viewport component for the viewer app */
@@ -24,7 +22,7 @@ export class SimpleViewportComponent extends React.Component<IProps> {
   public render() {
     return (
       <>
-        <SimpleViewport style={{height: '100vh'}} imodel={this.props.imodel} ruleset={this.props.rulesetId} viewDefinitionId={this.props.viewDefinitionId} />
+        <SimpleViewport style={{height: '100vh'}} imodel={this.props.imodel} viewDefinitionId={this.props.viewDefinitionId} />
         <Toolbar />
       </>
     );

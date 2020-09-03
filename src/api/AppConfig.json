@@ -1,7 +1,7 @@
 {
   "imjs_project_name": "Lehigh_Buildings",
   "imjs_imodel_name": "Lehigh_Buildings",
-  "imjs_browser_client_id": "imodeljs-spa-samples-2686",
+  "imjs_browser_client_id": "spa-912FyjSiVnKkjeCN816iKbv55",
   "imjs_browser_redirect_uri": "http://localhost:3000/signin-callback.html",
   "imjs_browser_scope": "openid email profile organization imodelhub context-registry-service:read-only product-settings-service general-purpose-imodeljs-backend imodeljs-router"
 }

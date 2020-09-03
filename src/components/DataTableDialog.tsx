@@ -33,9 +33,8 @@ export class DataTableDialog extends React.Component<IPropDialog, IStateDialog> 
 
   render() {
     const {selectedObject} = this.props;
-    const {isOpen} = this.state;
     return (
-      <Dialog style={{width: '660px'}} isOpen={isOpen} icon="home" onClose={this.handleClose} title={selectedObject ? selectedObject.data.buildingName : 'Building Not Found'} {...this.state}>
+      <Dialog style={{width: '660px'}} icon="home" onClose={this.handleClose} title={selectedObject ? selectedObject.data.buildingName : 'Building Not Found'} {...this.state}>
         <div className={Classes.DIALOG_BODY}>{selectedObject ? <DataTable selectedObject={selectedObject} /> : <h2>The data of this building is missing.</h2>}</div>
         <div className={Classes.DIALOG_FOOTER}>
           <div className={Classes.DIALOG_FOOTER_ACTIONS}></div>

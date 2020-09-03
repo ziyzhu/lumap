@@ -1,57 +1,71 @@
 {
-  "name": "lumap",
-  "version": "0.1.0",
-  "private": true,
-  "dependencies": {
-    "@bentley/bentleyjs-core": "1.12.0",
-    "@bentley/geometry-core": "1.12.0",
-    "@bentley/imodeljs-clients": "1.12.0",
-    "@bentley/imodeljs-common": "1.12.0",
-    "@bentley/imodeljs-frontend": "1.12.0",
-    "@bentley/imodeljs-i18n": "1.12.0",
-    "@bentley/imodeljs-quantity": "1.12.0",
-    "@bentley/presentation-common": "1.12.0",
-    "@bentley/presentation-components": "1.12.0",
-    "@bentley/presentation-frontend": "1.12.0",
-    "@bentley/ui-abstract": "1.12.0",
-    "@bentley/ui-components": "1.12.0",
-    "@bentley/ui-core": "1.12.0",
-    "@blueprintjs/core": "^3.24.0",
-    "@blueprintjs/select": "^3.12.0",
-    "axios": "^0.19.2",
-    "lodash": "^4.17.10",
-    "node-sass": "^4.13.1",
-    "react": "^16.13.0",
-    "react-dom": "^16.13.0",
-    "react-router-dom": "^5.1.2",
-    "react-scripts": "3.4.0"
-  },
-  "devDependencies": {
-    "@bentley/build-tools": "^1.13.0",
-    "@testing-library/jest-dom": "^4.2.4",
-    "@testing-library/react": "^9.5.0",
-    "@testing-library/user-event": "^7.2.1",
-    "@types/jest": "^24.9.1",
-    "@types/node": "^12.12.29",
-    "@types/react": "^16.9.23",
-    "@types/react-dom": "^16.9.5",
-    "@types/react-router-dom": "^5.1.3",
-    "eslint-plugin-flowtype": "^3.13.0",
-    "typescript": "^3.7.5"
-  },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "deploy": "aws s3 sync build/ s3://lehighmap.com",
-    "distribute": "aws cloudfront create-invalidation --distribution-id E16OC5S6N61KF8 --paths \"/*\""
-  },
-  "eslintConfig": {
-    "extends": "react-app"
-  },
-  "browserslist": {
-    "production": [">0.2%", "not dead", "not op_mini all"],
-    "development": ["last 1 chrome version", "last 1 firefox version", "last 1 safari version"]
-  }
+    "name": "lumap",
+    "version": "0.1.0",
+    "private": true,
+    "dependencies": {
+        "@bentley/bentleyjs-core": "2.5.3",
+        "@bentley/frontend-authorization-client": "2.5.3",
+        "@bentley/geometry-core": "2.5.3",
+        "@bentley/imodelhub-client": "2.5.3",
+        "@bentley/imodeljs-clients": "^1.14.1",
+        "@bentley/imodeljs-common": "2.5.3",
+        "@bentley/imodeljs-frontend": "2.5.3",
+        "@bentley/imodeljs-i18n": "2.5.3",
+        "@bentley/imodeljs-quantity": "2.5.3",
+        "@bentley/orbitgt-core": "2.5.3",
+        "@bentley/presentation-common": "2.5.3",
+        "@bentley/presentation-components": "2.5.3",
+        "@bentley/presentation-frontend": "2.5.3",
+        "@bentley/product-settings-client": "2.5.3",
+        "@bentley/rbac-client": "2.5.3",
+        "@bentley/ui-abstract": "2.5.3",
+        "@bentley/ui-components": "2.5.3",
+        "@bentley/ui-core": "2.5.3",
+        "@bentley/webgl-compatibility": "2.5.3",
+        "@blueprintjs/core": "^3.31.0",
+        "@blueprintjs/select": "^3.13.7",
+        "axios": "^0.19.2",
+        "lodash": "^4.17.20",
+        "node-sass": "^4.14.1",
+        "react": "^16.13.1",
+        "react-dom": "^16.13.1",
+        "react-router-dom": "^5.2.0",
+        "react-scripts": "3.4.0"
+    },
+    "devDependencies": {
+        "@bentley/build-tools": "^1.14.1",
+        "@testing-library/jest-dom": "^4.2.4",
+        "@testing-library/react": "^9.5.0",
+        "@testing-library/user-event": "^7.2.1",
+        "@types/jest": "^24.9.1",
+        "@types/node": "^12.12.55",
+        "@types/react": "^16.9.49",
+        "@types/react-dom": "^16.9.8",
+        "@types/react-router-dom": "^5.1.5",
+        "eslint-plugin-flowtype": "^3.13.0",
+        "typescript": "^3.9.6"
+    },
+    "scripts": {
+        "start": "react-scripts start",
+        "build": "react-scripts build",
+        "test": "react-scripts test",
+        "eject": "react-scripts eject",
+        "deploy": "aws s3 sync build/ s3://lehighmap.com",
+        "distribute": "aws cloudfront create-invalidation --distribution-id E16OC5S6N61KF8 --paths \"/*\""
+    },
+    "eslintConfig": {
+        "extends": "react-app"
+    },
+    "browserslist": {
+        "production": [
+            ">0.2%",
+            "not dead",
+            "not op_mini all"
+        ],
+        "development": [
+            "last 1 chrome version",
+            "last 1 firefox version",
+            "last 1 safari version"
+        ]
+    }
 }
