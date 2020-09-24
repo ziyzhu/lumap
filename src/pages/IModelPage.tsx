@@ -17,7 +17,6 @@ import * as AppConfig from '../api/AppConfig.json';
 import {AppSetting} from '../api/AppSetting';
 import {BuildingMapper, BuildingDataObject} from '../api/Mapper';
 
-// initialize logging to the console
 Logger.initializeToConsole();
 Logger.setLevelDefault(LogLevel.Warning);
 Logger.setLevel('basic-viewport-app', LogLevel.Info);
@@ -38,7 +37,6 @@ export default class IModelPage extends React.Component<{}, IStateImodelPage> {
   }
   render() {
     const {clientIsReady} = this.state;
-    // shows iModel once the iModel connection has been established
     if (clientIsReady) return <IModelContent />;
     return (
       <div className="page-center">
@@ -104,17 +102,14 @@ class IModelContent extends React.Component<{}, IStateImodelContent> {
       // attempt to open the imodel
       // const info = await this._getIModelInfo();
       // imodel = await IModelConnection.open(info.projectId, info.imodelId, OpenMode.Readonly);
-      
       const info = await this._getIModelInfo();
       imodel = await RemoteBriefcaseConnection.open(info.projectId, info.imodelId, OpenMode.Readonly);
-      
     } catch (e) {
       console.log(e.message);
     }
     console.log(imodel)
     await this._onIModelSelected(imodel);
   }
-  
 
   /** Finds project and imodel ids using their names */
   private async _getIModelInfo(): Promise<{projectId: string; imodelId: string}> {
@@ -156,7 +151,6 @@ class IModelContent extends React.Component<{}, IStateImodelContent> {
       });
       const appSetting = new AppSetting(imodel);
       appSetting.apply();
-
       const viewDefinitionId = await this.getFirstViewDefinitionId(imodel);
       this.setState({imodel, viewDefinitionId});
     } catch (e) {
@@ -274,7 +268,7 @@ class IModelContent extends React.Component<{}, IStateImodelContent> {
     const rulesetId = 'Default';
     let ui: React.ReactNode;
 
-    if (this.state.user.isLoading || window.location.href.includes(this._signInRedirectUri)) {
+    if (this.state.user.isLoading) {
       ui = (
         <div className="page-center">
           <Spinner size={Spinner.SIZE_STANDARD} />
@@ -282,11 +276,9 @@ class IModelContent extends React.Component<{}, IStateImodelContent> {
         </div>
       );
     } else if (!AppClient.oidcClient.hasSignedIn && !this.state.offlineIModel) {
-      // Only call with onOffline prop for electron mode since this is not a valid option for Web apps
       if (ElectronRpcConfiguration.isElectron) ui = <SignIn onSignIn={this._onStartSignin} onRegister={this._onRegister} onOffline={this._onOffline} />;
       else ui = <SignIn onSignIn={this._onStartSignin} onRegister={this._onRegister} />;
     } else if (!this.state.imodel || !this.state.viewDefinitionId) {
-      // NOTE: We needed to delay some initialization until now so we know if we are opening a snapshot or an imodel.
       ui = (
         <div className="page-center">
           <Spinner size={Spinner.SIZE_STANDARD} />

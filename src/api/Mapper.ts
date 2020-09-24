@@ -5,7 +5,6 @@ interface IGenericData {
   matchingKey: string;
 }
 
-// represents PI data structure
 interface IDynamicValue {
   value: string;
   unitAbbreviation: string;
@@ -13,7 +12,6 @@ interface IDynamicValue {
   good: boolean;
 }
 
-// represents PI data structure
 export interface IBuildingData extends IGenericData {
   buildingName: string;
   yearBuilt: IDynamicValue;
@@ -73,7 +71,6 @@ abstract class GenericMapper {
     GenericMapper.mapper = this;
   }
 
-  // Asynchronously returns the queried rows
   public async asyncQuery(imodel: IModelConnection, q: string): Promise<any[]> {
     const rows: any[] = [];
     for await (const row of imodel.query(q)) rows.push(row);
@@ -141,8 +138,9 @@ export class BuildingMapper extends GenericMapper {
 
     let bDict;
     try {
-      // const responseData = await fetch('https://lehighmap.csb.lehigh.edu:5000/api/v1/pi/buildings');
-      const responseData = await fetch('http://localhost:5000/api/v1/pi/buildings');
+      const responseData = await fetch('https://lehighmap.csb.lehigh.edu:5000/api/v1/pi/buildings');
+      // for testing only
+      // const responseData = await fetch('http://localhost:5000/api/v1/pi/buildings');
       const responseJson: any = await responseData.json();
       bDict = responseJson.buildings;
     } catch (err) {
@@ -151,10 +149,8 @@ export class BuildingMapper extends GenericMapper {
     }
 
     for (const buildingNumber in bDict) {
-      // building object
       const bObject: any = bDict[buildingNumber];
       const buildingName = bObject['BuildingName'];
-      // attribute dictionary
       const bAttrDict: {[attrName: string]: IDynamicValue} = {};
 
       for (const bAttr in bObject) {

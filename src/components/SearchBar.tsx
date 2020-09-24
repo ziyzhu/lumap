@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Card, ButtonGroup, Classes, Button, H5, Intent, ITagProps, MenuItem, Switch} from '@blueprintjs/core';
+import {Card, ButtonGroup, Classes, Button, H5, MenuItem} from '@blueprintjs/core';
 import {ItemPredicate, ItemRenderer, MultiSelect} from '@blueprintjs/select';
 import {IBuildingData, BuildingMapper, BuildingDataObject} from '../api/Mapper';
 import {areBuildingsEqual, arrayContainsBuilding} from '../api/buildings';
@@ -74,7 +74,6 @@ export class SearchBar extends React.Component<{}, IState> {
 
   private deselectBuilding(index: number) {
     const {buildings} = this.state;
-    const building = buildings[index];
 
     // Delete the item if the user manually created it.
     this.setState({

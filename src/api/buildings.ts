@@ -1,6 +1,3 @@
-import {MenuItem} from '@blueprintjs/core';
-import {ItemPredicate, ItemRenderer} from '@blueprintjs/select';
-import * as React from 'react';
 import {IBuildingData} from '../api/Mapper';
 
 export function areBuildingsEqual(buildingA: IBuildingData, buildingB: IBuildingData) {

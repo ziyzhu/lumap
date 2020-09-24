@@ -1,7 +1,6 @@
 import * as React from 'react';
 import {Drawer, Button, Classes, Position} from '@blueprintjs/core';
-import {BuildingMapper, BuildingDataObject} from '../api/Mapper';
-import {handleUserEvent, UserEvent} from '../api/UserEvent';
+import {BuildingDataObject} from '../api/Mapper';
 import {SearchBar} from '../components/SearchBar';
 
 interface IProps {
@@ -29,7 +28,6 @@ export default class DrawerComponent extends React.Component<IProps> {
 
   render() {
     // TODO currently used for demo purposes
-    const selectedObjects = this.props.selectedObjects;
 
     return (
       <>

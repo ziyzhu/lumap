@@ -1,5 +1,3 @@
-import {ActionType, EmphasizeElementManager} from '../api/EmphasizeElementManager';
-
 export enum ImodelEvent {
   ElementSelected,
   // more events will be supported

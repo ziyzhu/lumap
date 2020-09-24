@@ -1,6 +1,6 @@
 import {IModelApp, EmphasizeElements} from '@bentley/imodeljs-frontend';
 import {BuildingMapper} from '../api/Mapper';
-import {EmphasizeElementManager, ActionType} from '../api/EmphasizeElementManager';
+import {EmphasizeElementManager} from '../api/EmphasizeElementManager';
 import {ColorDef} from '@bentley/imodeljs-common';
 
 export enum UserEvent {

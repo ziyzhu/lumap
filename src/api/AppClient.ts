@@ -1,7 +1,7 @@
-import {Logger, LogLevel, ClientRequestContext} from '@bentley/bentleyjs-core';
-import {OidcFrontendClientConfiguration, IOidcFrontendClient, Config, UrlDiscoveryClient} from '@bentley/imodeljs-clients';
+import {ClientRequestContext} from '@bentley/bentleyjs-core';
+import {UrlDiscoveryClient} from '@bentley/imodeljs-clients';
 import { BrowserAuthorizationCallbackHandler, BrowserAuthorizationClient, BrowserAuthorizationClientConfiguration } from "@bentley/frontend-authorization-client";
-import {IModelApp, OidcBrowserClient, FrontendRequestContext} from '@bentley/imodeljs-frontend';
+import {IModelApp, FrontendRequestContext} from '@bentley/imodeljs-frontend';
 import {BentleyCloudRpcManager, BentleyCloudRpcParams} from '@bentley/imodeljs-common';
 import {RpcInterfaceDefinition, IModelReadRpcInterface, IModelTileRpcInterface, SnapshotIModelRpcInterface} from '@bentley/imodeljs-common';
 import {PresentationRpcInterface} from '@bentley/presentation-common';
@@ -14,9 +14,9 @@ export function getSupportedRpcs(): RpcInterfaceDefinition[] {
 }
 
 export class AppClient {
-  private static _isReady: Promise<Boolean>;
+  private static _isReady: Promise<void>;
   public static get oidcClient() { return IModelApp.authorizationClient!; }
-  public static get ready(): Promise<Boolean> {
+  public static get ready(): Promise<void> {
     return this._isReady;
   }
   public static async startup() {
@@ -29,7 +29,7 @@ export class AppClient {
     });
     initPromises.push(AppClient.initializeRpc());
     initPromises.push(AppClient.initializeOidc());
-    return Promise.all(initPromises);
+    this._isReady = Promise.all(initPromises).then(() => {});
   }
 
   private static async initializeRpc(): Promise<void> {

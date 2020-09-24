@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import {AnchorButton, Button, Classes, Code, Dialog, H5, Intent, Switch, Tooltip} from '@blueprintjs/core';
-import {IBuildingData, BuildingDataObject} from '../api/Mapper';
+import {Classes, Dialog} from '@blueprintjs/core';
+import {BuildingDataObject} from '../api/Mapper';
 
 interface IPropDialog {
   isOpen: boolean;
