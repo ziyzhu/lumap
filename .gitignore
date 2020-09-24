@@ -4,6 +4,10 @@
 /node_modules
 /.pnp
 .pnp.js
+package-lock.json
+
+# credentials
+GoogleConfig.ts
 
 # testing
 /coverage
