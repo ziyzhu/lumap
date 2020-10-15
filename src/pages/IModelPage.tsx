@@ -61,7 +61,6 @@ interface IStateImodelContent {
 }
 
 class IModelContent extends React.Component<{}, IStateImodelContent> {
-  /** Creates an App instance */
   constructor(props?: any, context?: any) {
     super(props, context);
     this.state = {
@@ -107,11 +106,9 @@ class IModelContent extends React.Component<{}, IStateImodelContent> {
     } catch (e) {
       console.log(e.message);
     }
-    console.log(imodel)
     await this._onIModelSelected(imodel);
   }
 
-  /** Finds project and imodel ids using their names */
   private async _getIModelInfo(): Promise<{projectId: string; imodelId: string}> {
     const projectName = AppConfig.imjs_project_name;
     const imodelName = AppConfig.imjs_imodel_name;
@@ -171,15 +168,15 @@ class IModelContent extends React.Component<{}, IStateImodelContent> {
         selection.instanceKeys.forEach((ids, ecclass) => {
           console.log(`${ecclass}: ${Array.from(ids).join(',')}`);
 
-          if (BuildingMapper.mapper) {
-            const selectedObjects = BuildingMapper.mapper.getDataFromEcSet(ids);
-            this.addToast(this.createToast(selectedObjects && selectedObjects[0] ? selectedObjects[0].data.buildingName : undefined));
-            this.setState({selectedObjects: BuildingMapper.mapper.getDataFromEcSet(ids)});
+          if (BuildingMapper.current) {
+            const selectedObjects = BuildingMapper.current.getDataFromEcSet(ids);
+            //this.addToast(this.createToast(selectedObjects && selectedObjects[0] ? selectedObjects[0].data.buildingName : undefined));
+            this.addToast(this.createToast(selectedObjects && selectedObjects[0] ? selectedObjects[0].key : undefined));
+            this.setState({selectedObjects: BuildingMapper.current.getDataFromEcSet(ids)});
           }
         });
       }
       if (selection.nodeKeys.size !== 0) {
-        // log all selected node keys
         console.log('Nodes:');
         selection.nodeKeys.forEach(key => console.log(JSON.stringify(key)));
       }
@@ -220,7 +217,6 @@ class IModelContent extends React.Component<{}, IStateImodelContent> {
 
   private delayedInitialization() {
     if (this.state.offlineIModel) {
-      // WORKAROUND: Clear authorization client if operating in offline mode
       IModelApp.authorizationClient = undefined;
     }
   }
@@ -300,7 +296,7 @@ class IModelContent extends React.Component<{}, IStateImodelContent> {
           <Toolbar />
           <DrawerComponent selectedObjects={this.state.selectedObjects} />
           <Toaster autoFocus={false} canEscapeKeyClear={true} position={Position.TOP} ref={this.refHandlers.toaster} />;
-          <DataTableDialog handleClose={this.handleDialogClose} isOpen={this.state.dataTableIsOpen} selectedObject={this.state.selectedObjects ? this.state.selectedObjects[0] : undefined} />
+          <DataTableDialog handleClose={this.handleDialogClose} isOpen={this.state.dataTableIsOpen} selectedObjects={this.state.selectedObjects} />
         </>
       );
     }

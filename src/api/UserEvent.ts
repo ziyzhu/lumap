@@ -15,11 +15,11 @@ export enum UserEvent {
  * Handles callbacks for all types of user event
  */
 export const handleUserEvent = (matchingKey: string, event: UserEvent) => {
-  if (!IModelApp || !IModelApp.viewManager || !IModelApp.viewManager.selectedView || !BuildingMapper.mapper) {
+  if (!IModelApp || !IModelApp.viewManager || !IModelApp.viewManager.selectedView || !BuildingMapper.current) {
     return;
   }
 
-  const buildingMapper = BuildingMapper.mapper;
+  const buildingMapper = BuildingMapper.current;
   const ecId = buildingMapper.getEcFromKey(matchingKey);
   const manager = EmphasizeElementManager.current;
   const viewport = IModelApp.viewManager.selectedView;

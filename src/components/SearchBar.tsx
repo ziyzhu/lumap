@@ -1,16 +1,15 @@
 import * as React from 'react';
 import {Card, ButtonGroup, Classes, Button, H5, MenuItem} from '@blueprintjs/core';
 import {ItemPredicate, ItemRenderer, MultiSelect} from '@blueprintjs/select';
-import {IBuildingData, BuildingMapper, BuildingDataObject} from '../api/Mapper';
-import {areBuildingsEqual, arrayContainsBuilding} from '../api/buildings';
+import {BuildingMapper, BuildingDataObject} from '../api/Mapper';
 import {UserEvent, handleUserEvent} from '../api/UserEvent';
 import {DataTableDialog} from '../components/DataTableDialog';
 
-const BuildingMultiSelect = MultiSelect.ofType<IBuildingData>();
+const BuildingMultiSelect = MultiSelect.ofType<any>();
 
 interface IState {
-  buildings: IBuildingData[];
-  items: IBuildingData[];
+  buildings: any[];
+  items: any[];
   dataTableIsOpen: boolean;
   dataTableKey: string;
 }
@@ -27,11 +26,12 @@ export class SearchBar extends React.Component<{}, IState> {
   }
 
   componentDidMount() {
-    const dataObjects: BuildingDataObject[] = BuildingMapper.mapper.getDataObjects();
-    this.setState({items: dataObjects.map(obj => obj.data)});
+    const dataObjects: BuildingDataObject[] = BuildingMapper.current.getDataObjects();
+    // this.setState({items: dataObjects.map(obj => obj.data)});
+    this.setState({items: dataObjects.map(obj => obj.sheetData)});
   }
 
-  private getSelectedBuildingIndex(selectedBuilding: IBuildingData) {
+  private getSelectedBuildingIndex(selectedBuilding: any) {
     let buildingIndex = -1;
     this.state.buildings!.forEach((building, index) => {
       if (building.matchingKey === selectedBuilding.matchingKey) {
@@ -41,22 +41,22 @@ export class SearchBar extends React.Component<{}, IState> {
     return buildingIndex;
   }
 
-  private isBuildingSelected(building: IBuildingData) {
+  private isBuildingSelected(building: any) {
     return this.getSelectedBuildingIndex(building) !== -1;
   }
 
-  private renderBuilding: ItemRenderer<IBuildingData> = (building, {modifiers, handleClick}) => {
+  private renderBuilding: ItemRenderer<any> = (building, {modifiers, handleClick}) => {
     if (!modifiers.matchesPredicate) {
       return null;
     }
     return <MenuItem active={modifiers.active} icon={this.isBuildingSelected(building) ? 'tick' : 'blank'} key={building.matchingKey} label={building.yearBuilt.value} onClick={handleClick} text={`${building.buildingName}`} shouldDismissPopover={false} />;
   };
 
-  private selectBuilding(building: IBuildingData) {
+  private selectBuilding(building: any) {
     this.selectBuildings([building]);
   }
 
-  private selectBuildings(buildingsToSelect: IBuildingData[]) {
+  private selectBuildings(buildingsToSelect: any[]) {
     const {buildings, items} = this.state;
 
     let nextBuildings = buildings.slice();
@@ -75,14 +75,13 @@ export class SearchBar extends React.Component<{}, IState> {
   private deselectBuilding(index: number) {
     const {buildings} = this.state;
 
-    // Delete the item if the user manually created it.
     this.setState({
       buildings: buildings.filter((_building, i) => i !== index),
       items: this.state.items,
     });
   }
 
-  private handleBuildingSelect = (building: IBuildingData) => {
+  private handleBuildingSelect = (building: any) => {
     if (!this.isBuildingSelected(building)) {
       this.selectBuilding(building);
     } else {
@@ -90,7 +89,7 @@ export class SearchBar extends React.Component<{}, IState> {
     }
   };
 
-  private renderTag = (building: IBuildingData) => building.buildingName;
+  private renderTag = (building: any) => building.buildingName;
 
   private handleTagRemove = (_tag: string, index: number) => {
     this.deselectBuilding(index);
@@ -98,13 +97,12 @@ export class SearchBar extends React.Component<{}, IState> {
 
   private handleClear = () => this.setState({buildings: []});
 
-  private handleBuildingsPaste = (buildings: IBuildingData[]) => {
-    // On paste, don't bother with deselecting already selected values, just
-    // add the new ones.
+  private handleBuildingsPaste = (buildings: any[]) => {
     this.selectBuildings(buildings);
   };
 
-  private filterBuilding: ItemPredicate<IBuildingData> = (query, building, _index, exactMatch) => {
+  private filterBuilding: ItemPredicate<any> = (query, building, _index, exactMatch) => {
+    console.log(building);
     const normalizedName = building.buildingName.toLowerCase();
     const normalizedQuery = query.toLowerCase();
 
@@ -118,7 +116,7 @@ export class SearchBar extends React.Component<{}, IState> {
 
   render() {
     const clearButton = this.state.buildings.length > 0 ? <Button icon="cross" minimal={true} onClick={this.handleClear} /> : undefined;
-    const mapper = BuildingMapper.mapper;
+    const mapper = BuildingMapper.current;
     return (
       <>
         <div className="container" style={{justifyContent: 'center'}}>
@@ -184,9 +182,17 @@ export class SearchBar extends React.Component<{}, IState> {
               </ButtonGroup>
             </Card>
           ))}
-          <DataTableDialog handleClose={this.handleDialogClose} isOpen={this.state.dataTableIsOpen} selectedObject={mapper.getDataFromKey(this.state.dataTableKey)} />
+          <DataTableDialog handleClose={this.handleDialogClose} isOpen={this.state.dataTableIsOpen} selectedObjects={[mapper.getDataFromKey(this.state.dataTableKey)]} />
         </div>
       </>
     );
   }
+}
+
+function areBuildingsEqual(buildingA: any, buildingB: any) {
+  return buildingA.matchingKey.toLowerCase() === buildingB.matchingKey.toLowerCase();
+}
+
+function arrayContainsBuilding(buildings: any[], buildingToFind: any): boolean {
+  return buildings.some((building: any) => building.matchingKey === buildingToFind.matchingKey);
 }

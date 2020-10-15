@@ -1,18 +1,19 @@
 import * as React from 'react';
-
 import {Classes, Dialog} from '@blueprintjs/core';
 import {BuildingDataObject} from '../api/Mapper';
+import {PIDataIntegrator} from '../api/PIDataIntegrator';
 
-interface IPropDialog {
+interface IPropDataTableDialog {
   isOpen: boolean;
-  selectedObject?: BuildingDataObject;
+  selectedObjects?: BuildingDataObject[];
   handleClose?: any;
 }
-interface IStateDialog {
+
+interface IStateDataTableDialog {
   isOpen: boolean;
 }
 
-export class DataTableDialog extends React.Component<IPropDialog, IStateDialog> {
+export class DataTableDialog extends React.Component<IPropDataTableDialog, IStateDataTableDialog> {
   constructor(props) {
     super(props);
     this.state = {
@@ -32,10 +33,11 @@ export class DataTableDialog extends React.Component<IPropDialog, IStateDialog> 
   };
 
   render() {
-    const {selectedObject} = this.props;
+    const { selectedObjects } = this.props;
+    console.log(selectedObjects);
     return (
-      <Dialog style={{width: '660px'}} icon="home" onClose={this.handleClose} title={selectedObject ? selectedObject.data.buildingName : 'Building Not Found'} {...this.state}>
-        <div className={Classes.DIALOG_BODY}>{selectedObject ? <DataTable selectedObject={selectedObject} /> : <h2>The data of this building is missing.</h2>}</div>
+      <Dialog style={{width: '660px'}} icon="home" onClose={this.handleClose} title={""/*selectedObjects ? selectedObjects.data.buildingName : 'Building Not Found'*/} {...this.state}>
+        <div className={Classes.DIALOG_BODY}>{selectedObjects ? <DataTable selectedObjects={selectedObjects} /> : <h2>The data of this building is missing.</h2>}</div>
         <div className={Classes.DIALOG_FOOTER}>
           <div className={Classes.DIALOG_FOOTER_ACTIONS}></div>
         </div>
@@ -44,11 +46,13 @@ export class DataTableDialog extends React.Component<IPropDialog, IStateDialog> 
   }
 }
 
-interface IPropTable {
-  selectedObject: BuildingDataObject;
+interface IPropDataTable {
+  selectedObjects: BuildingDataObject[];
 }
 
-interface IStateTable {}
+interface IStateDataTable {
+  plotParams: any;
+}
 
 declare global {
   interface Window {
@@ -56,115 +60,51 @@ declare global {
   }
 }
 
-export class DataTable extends React.Component<IPropTable, IStateTable> {
+export class DataTable extends React.Component<IPropDataTable, IStateDataTable> {
+  
+  fixedData: {};
+  plotData: {};
+  isLoading: boolean;
+
   constructor(props) {
     super(props);
+    this.fixedData = {};
+    this.plotData = {};
+    this.isLoading = true;
+    this.state = {
+      plotParams: {},
+    };
+  }
+
+  componentDidMount() {
+    const proxyUrl = "https://lehighmap.csb.lehigh.edu:5000/api/piwebapi";
+    const baseUrl = "https://pi-core.cc.lehigh.edu/piwebapi";
+    const integrator = new PIDataIntegrator(proxyUrl, baseUrl);
+    const { selectedObjects } = this.props;
+    if (!selectedObjects) return;
+
+    const promises = new Array<Promise<any>>();
+    const plots: any = [];
+    for (const selectedObject of selectedObjects) {
+      if (!selectedObject.piWebId) continue
+      promises.push(integrator.getPlot(selectedObject.piWebId).then(plot => plots.push(plot)));
+    }
+
+    Promise.all(promises).then(() => {
+      const { fixedData, plotData } = integrator.parsePlots(plots)!;
+      this.fixedData = fixedData;
+      this.plotData = plotData;
+    }).then(() => this.isLoading = false);
   }
 
   render() {
-    const {data, sheetData} = this.props.selectedObject;
+    for (const selectedObject of this.props.selectedObjects) {
+      const { sheetData } = selectedObject;
+    }
 
     return (
       <table className="bp3-html-table bp3-interactive bp3-html-table-striped ">
-        <thead>
-          <tr>
-            <th>Attribute</th>
-            <th>Value</th>
-            <th>Unit</th>
-            <th>Last Recorded</th>
-            <th>Condition</th>
-          </tr>
-        </thead>
-        <tbody>
-          {'waterUsage' in sheetData && (
-            <tr>
-              <td>Daily Water Usage</td>
-              <td>{sheetData.waterUsage}</td>
-              <td>{sheetData.waterUsageUnit}</td>
-              <td>{sheetData.timestamp}</td>
-              <td>{sheetData.condition}</td>
-            </tr>
-          )}
-          {'gasUsage' in sheetData && (
-            <tr>
-              <td>Daily Gas Usage</td>
-              <td>{sheetData.gasUsage}</td>
-              <td>{sheetData.gasUsageUnit}</td>
-              <td>{sheetData.timestamp}</td>
-              <td>{sheetData.condition}</td>
-            </tr>
-          )}
-          <tr>
-            <td>Daily Power</td>
-            <td>{data.dailyPower.value}</td>
-            <td>{data.dailyPower.unitAbbreviation}</td>
-            <td>{data.dailyPower.timestamp}</td>
-            <td>{data.dailyPower.good === true ? 'Good' : 'Not Good'}</td>
-          </tr>
-          <tr>
-            <td>Daily Eenergy</td>
-            <td>{data.dailyEnergy.value}</td>
-            <td>{data.dailyEnergy.unitAbbreviation}</td>
-            <td>{data.dailyEnergy.timestamp}</td>
-            <td>{data.dailyEnergy.good === true ? 'Good' : 'Not Good'}</td>
-          </tr>
-          <tr>
-            <td>Year Built</td>
-            <td>{data.yearBuilt.value}</td>
-            <td>{data.yearBuilt.unitAbbreviation}</td>
-            <td>{data.yearBuilt.timestamp}</td>
-            <td>{data.yearBuilt.good === true ? 'Good' : 'Not Good'}</td>
-          </tr>
-          <tr>
-            <td>Longitude</td>
-            <td>{data.longitude.value}</td>
-            <td>{data.longitude.unitAbbreviation}</td>
-            <td>{data.longitude.timestamp}</td>
-            <td>{data.longitude.good === true ? 'Good' : 'Not Good'}</td>
-          </tr>
-          <tr>
-            <td>Latitude</td>
-            <td>{data.latitude.value}</td>
-            <td>{data.latitude.unitAbbreviation}</td>
-            <td>{data.latitude.timestamp}</td>
-            <td>{data.latitude.good === true ? 'Good' : 'Not Good'}</td>
-          </tr>
-          <tr>
-            <td>Campus</td>
-            <td>{data.campus.value}</td>
-            <td>{data.campus.unitAbbreviation}</td>
-            <td>{data.campus.timestamp}</td>
-            <td>{data.campus.good === true ? 'Good' : 'Not Good'}</td>
-          </tr>
-          <tr>
-            <td>Building Type</td>
-            <td>{data.buildingType.value}</td>
-            <td>{data.buildingType.unitAbbreviation}</td>
-            <td>{data.buildingType.timestamp}</td>
-            <td>{data.buildingType.good === true ? 'Good' : 'Not Good'}</td>
-          </tr>
-          <tr>
-            <td>Building Number</td>
-            <td>{data.buildingNumber.value}</td>
-            <td>{data.buildingNumber.unitAbbreviation}</td>
-            <td>{data.buildingNumber.timestamp}</td>
-            <td>{data.buildingNumber.good === true ? 'Good' : 'Not Good'}</td>
-          </tr>
-          <tr>
-            <td>Building Address</td>
-            <td>{data.address.value}</td>
-            <td>{data.address.unitAbbreviation}</td>
-            <td>{data.address.timestamp}</td>
-            <td>{data.address.good === true ? 'Good' : 'Not Good'}</td>
-          </tr>
-          <tr>
-            <td>Building About</td>
-            <td>{data.about.value}</td>
-            <td>{data.about.unitAbbreviation}</td>
-            <td>{data.about.timestamp}</td>
-            <td>{data.about.good === true ? 'Good' : 'Not Good'}</td>
-          </tr>
-        </tbody>
+      {/* TODO change commented part to a better UI component & D3.js to fit fixedData, plotData, and sheetData */}
       </table>
     );
   }
