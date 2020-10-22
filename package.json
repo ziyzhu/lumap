@@ -25,6 +25,7 @@
         "@blueprintjs/core": "^3.31.0",
         "@blueprintjs/select": "^3.13.7",
         "axios": "^0.19.2",
+        "d3-scale": "^3.2.3",
         "lodash": "^4.17.20",
         "node-sass": "^4.14.1",
         "react": "^16.13.1",
@@ -42,8 +43,12 @@
         "@types/react": "^16.9.49",
         "@types/react-dom": "^16.9.8",
         "@types/react-router-dom": "^5.1.5",
+        "@typescript-eslint/eslint-plugin": "^4.5.0",
+        "@typescript-eslint/parser": "^4.5.0",
+        "eslint": "^7.11.0",
+        "eslint-config-prettier": "^6.14.0",
         "eslint-plugin-flowtype": "^3.13.0",
-        "typescript": "^3.9.6"
+        "typescript": "^3.9.7"
     },
     "scripts": {
         "start": "react-scripts start",
@@ -52,9 +57,6 @@
         "eject": "react-scripts eject",
         "deploy": "aws s3 sync build/ s3://lehighmap.com",
         "distribute": "aws cloudfront create-invalidation --distribution-id E16OC5S6N61KF8 --paths \"/*\""
-    },
-    "eslintConfig": {
-        "extends": "react-app"
     },
     "browserslist": {
         "production": [
