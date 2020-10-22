@@ -66,6 +66,7 @@ export class PIDataIntegrator {
             fixedData.push(fixedDataItem);
         }
 
+        // TODO remove non-number values
         let attrIndex = 8;
         for (const attrName in plotData) {
             const initialAttributes = plots[0]['Items'][attrIndex]['Items'];
@@ -78,7 +79,7 @@ export class PIDataIntegrator {
                 for (let z = 0; z < attrValues.length - 1; z++) {
                     const aggValue = parseFloat(plotData[attrName][z]['Value']);
                     const value = parseFloat(attrValues[z]['Value']);
-                    if (attrName in plotData) {
+                    if (typeof value === 'number' && attrName in plotData) {
                         plotData[attrName][z]['Value'] = aggValue + value;
                     }
                 }

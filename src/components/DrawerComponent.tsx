@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {Drawer, Button, Classes, Position} from '@blueprintjs/core';
 import {BuildingDataObject} from '../api/Mapper';
-import {SearchBar} from '../components/SearchBar';
+//import {SearchBar} from '../components/SearchBar';
 
 interface IProps {
     selectedObjects?: BuildingDataObject[];

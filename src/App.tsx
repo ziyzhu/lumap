@@ -6,11 +6,11 @@ import {useLocation, BrowserRouter, Route, Switch, Redirect} from 'react-router-
 import IModelPage from './pages/IModelPage';
 
 function App() {
-  return (
-    <BrowserRouter>
-      <Route exact path={['/', '/home']} component={IModelPage} />
-    </BrowserRouter>
-  );
+    return (
+        <BrowserRouter>
+            <Route exact path={['/', '/home']} component={IModelPage} />
+        </BrowserRouter>
+    );
 }
 
 export default App;

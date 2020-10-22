@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {PIDataIntegrator} from '../api/PIDataIntegrator';
 import {Spinner} from '@blueprintjs/core';
+import {LinePlot} from '../graphs/LinePlot';
 
 interface IPropDataTable {
     selectedObjects: any[];
@@ -68,6 +69,7 @@ export class DataTable extends React.Component<IPropDataTable, IStateDataTable> 
         } else {
             ui = (
                 <>
+                    <LinePlot data={plotData['Daily Energy']} size={[500, 500]}/>
                     <p>{JSON.stringify(fixedData)}</p>
                     <p>{JSON.stringify(plotData)}</p>
                 </>

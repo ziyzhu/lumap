@@ -37,6 +37,7 @@ export class BuildingMapper {
         const adaptor = (s: string) => s.replace(/^0+/, '');
         const ecToKeyTable: {[ecInstanceId: string]: string} = {};
         const imodelBuildings = await this.asyncQuery(imodel, 'select * from DgnCustomItemTypes_Building.Building__x0020__InformationElementAspect;');
+        console.log(imodelBuildings);
         for (const building of imodelBuildings) {
             ecToKeyTable[building.element.id] = adaptor(building.building__x0020__Number);
         }
