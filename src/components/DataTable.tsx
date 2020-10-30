@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {PIDataIntegrator} from '../api/PIDataIntegrator';
 import {Spinner} from '@blueprintjs/core';
-import {LinePlot} from '../graphs/LinePlot';
+import {PlotGroup} from '../graphs/PlotGroup';
 
 interface IPropDataTable {
     selectedObjects: any[];
@@ -58,22 +58,13 @@ export class DataTable extends React.Component<IPropDataTable, IStateDataTable> 
         //for (const selectedObject of this.props.selectedObjects) {
         //  const { sheetData } = selectedObject;
         //}
-
         const {isLoading, fixedData, plotData} = this.state;
-        console.log(fixedData)
-        console.log(plotData)
 
         let ui: JSX.Element;
         if (isLoading) {
             ui = <Spinner size={Spinner.SIZE_STANDARD} />;
         } else {
-            ui = (
-                <>
-                    <LinePlot data={plotData['Daily Energy']} size={[500, 500]}/>
-                    <p>{JSON.stringify(fixedData)}</p>
-                    <p>{JSON.stringify(plotData)}</p>
-                </>
-            );
+            ui = <PlotGroup data={plotData} size={[900, 500]}/>;
         }
         return ui;
     }
