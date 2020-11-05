@@ -28,13 +28,13 @@ export class SearchBar extends React.Component<{}, IState> {
     componentDidMount() {
         const dataObjects: BuildingDataObject[] = BuildingMapper.current.getDataObjects();
         // this.setState({items: dataObjects.map(obj => obj.data)});
-        this.setState({items: dataObjects.map(obj => obj.sheetData)});
+        this.setState({items: dataObjects});
     }
 
     private getSelectedBuildingIndex(selectedBuilding: any) {
         let buildingIndex = -1;
         this.state.buildings!.forEach((building, index) => {
-            if (building.matchingKey === selectedBuilding.matchingKey) {
+            if (building.key === selectedBuilding.key) {
                 buildingIndex = index;
             }
         });
@@ -49,7 +49,7 @@ export class SearchBar extends React.Component<{}, IState> {
         if (!modifiers.matchesPredicate) {
             return null;
         }
-        return <MenuItem active={modifiers.active} icon={this.isBuildingSelected(building) ? 'tick' : 'blank'} key={building.matchingKey} label={building.yearBuilt.value} onClick={handleClick} text={`${building.buildingName}`} shouldDismissPopover={false} />;
+        return <MenuItem active={modifiers.active} icon={this.isBuildingSelected(building) ? 'tick' : 'blank'} key={building.key} label={building.buildingType} onClick={handleClick} text={`${building.name}`} shouldDismissPopover={false} />;
     };
 
     private selectBuilding(building: any) {
@@ -89,9 +89,9 @@ export class SearchBar extends React.Component<{}, IState> {
         }
     };
 
-    private renderTag = (building: any) => building.buildingName;
+    private renderTag = (building: any) => building.name;
 
-    private handleTagRemove = (_tag: string, index: number) => {
+    private handleTagRemove = (_tag: React.ReactNode, index: number) => {
         this.deselectBuilding(index);
     };
 
@@ -102,16 +102,17 @@ export class SearchBar extends React.Component<{}, IState> {
     };
 
     private filterBuilding: ItemPredicate<any> = (query, building, _index, exactMatch) => {
-        console.log(building);
-        const normalizedName = building.buildingName.toLowerCase();
+        const normalizedName = building.name.toLowerCase();
+        const normalizedType = building.buildingType.toLowerCase();
         const normalizedQuery = query.toLowerCase();
 
         if (exactMatch) {
             return normalizedName === normalizedQuery;
         } else {
-            return `${normalizedName}. ${building.yearBuilt.value}`.indexOf(normalizedQuery) >= 0;
+            return `${normalizedName}. ${normalizedType}`.indexOf(normalizedQuery) >= 0;
         }
     };
+
     private handleDialogClose = () => this.setState({dataTableIsOpen: false});
 
     render() {
@@ -139,43 +140,43 @@ export class SearchBar extends React.Component<{}, IState> {
                 </div>
                 <div className="container" style={{display: 'block'}}>
                     {this.state.buildings.map(building => (
-                        <Card key={building.buildingNumber.value} style={{marginBottom: '10px'}}>
+                        <Card key={building.key} style={{marginBottom: '10px'}}>
                             <H5>
                                 <a
                                     href="#"
                                     onClick={() => {
-                                        this.setState({dataTableIsOpen: true, dataTableKey: building.matchingKey});
+                                        this.setState({dataTableIsOpen: true, dataTableKey: building.key});
                                     }}>
-                                    {building.buildingName}
+                                    {building.name}
                                 </a>
                             </H5>
-                            <p>{building.address.value}</p>
+                            <p>{building.buildingType}</p>
                             <ButtonGroup style={{minWidth: 200}}>
                                 <Button
                                     text="Zoom In"
                                     onClick={() => {
-                                        handleUserEvent(building.matchingKey, UserEvent.ZoomIn);
+                                        handleUserEvent(building.key, UserEvent.ZoomIn);
                                     }}
                                     className={Classes.BUTTON}
                                 />
                                 <Button
                                     text="Highlight"
                                     onClick={() => {
-                                        handleUserEvent(building.matchingKey, UserEvent.Highlight);
+                                        handleUserEvent(building.key, UserEvent.Highlight);
                                     }}
                                     className={Classes.BUTTON}
                                 />
                                 <Button
                                     text="Isolate"
                                     onClick={() => {
-                                        handleUserEvent(building.matchingKey, UserEvent.Isolate);
+                                        handleUserEvent(building.key, UserEvent.Isolate);
                                     }}
                                     className={Classes.BUTTON}
                                 />
                                 <Button
                                     text="Clear"
                                     onClick={() => {
-                                        handleUserEvent(building.matchingKey, UserEvent.Clear);
+                                        handleUserEvent(building.key, UserEvent.Clear);
                                     }}
                                     className={Classes.BUTTON}
                                 />
@@ -190,9 +191,9 @@ export class SearchBar extends React.Component<{}, IState> {
 }
 
 function areBuildingsEqual(buildingA: any, buildingB: any) {
-    return buildingA.matchingKey.toLowerCase() === buildingB.matchingKey.toLowerCase();
+    return buildingA.key.toLowerCase() === buildingB.key.toLowerCase();
 }
 
 function arrayContainsBuilding(buildings: any[], buildingToFind: any): boolean {
-    return buildings.some((building: any) => building.matchingKey === buildingToFind.matchingKey);
+    return buildings.some((building: any) => building.key === buildingToFind.key);
 }

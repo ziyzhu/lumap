@@ -71,7 +71,7 @@ class IModelContent extends React.Component<{}, IStateImodelContent> {
             offlineIModel: false,
             viewDefinitionId: undefined,
             imodel: undefined,
-            selectedObjects: undefined,
+            selectedObjects: [],
             mapperIsReady: false,
             dataTableIsOpen: false,
         };
@@ -160,21 +160,14 @@ class IModelContent extends React.Component<{}, IStateImodelContent> {
         } else {
             console.log('Selection change');
             if (selection.instanceKeys.size !== 0) {
-                console.log('ECInstances:');
                 selection.instanceKeys.forEach((ids, ecclass) => {
-                    console.log(`${ecclass}: ${Array.from(ids).join(',')}`);
-
                     if (BuildingMapper.current) {
                         const selectedObjects = BuildingMapper.current.getDataFromEcSet(ids);
-                        //this.addToast(this.createToast(selectedObjects && selectedObjects[0] ? selectedObjects[0].data.buildingName : undefined));
-                        this.addToast(this.createToast(selectedObjects && selectedObjects[0] ? selectedObjects[0].key : undefined));
+                        const toastMessage = selectedObjects.map(obj => `${obj.name} (${obj.buildingType})`).join(', ');
+                        this.addToast(this.createToast(toastMessage));
                         this.setState({selectedObjects: BuildingMapper.current.getDataFromEcSet(ids)});
                     }
                 });
-            }
-            if (selection.nodeKeys.size !== 0) {
-                console.log('Nodes:');
-                selection.nodeKeys.forEach(key => console.log(JSON.stringify(key)));
             }
         }
     };

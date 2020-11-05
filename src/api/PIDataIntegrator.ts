@@ -46,6 +46,13 @@ export class PIDataIntegrator {
         return plot;
     }
 
+    async getValues(webId: string, params?: any) {
+        const path = `streamsets/${webId}/value`;
+        const url = this.buildUrl(path, params);
+        const plot = await this.fetch(url);
+        return plot;
+    }
+
     parsePlots(plots: any) {
         const fixedData: any[] = [];
         const plotData: any = {};
@@ -66,7 +73,6 @@ export class PIDataIntegrator {
             fixedData.push(fixedDataItem);
         }
 
-        // TODO remove non-number values
         let attrIndex = 8;
         for (const attrName in plotData) {
             const initialAttributes = plots[0]['Items'][attrIndex]['Items'];
@@ -74,6 +80,7 @@ export class PIDataIntegrator {
             for (let j = 1; j < plots.length; j++) {
                 const plot = plots[j];
                 const attr = plot['Items'][attrIndex];
+                if (!attr) continue;
                 const attrValues = attr['Items'];
                 if (plotData[attrName].length != attrValues.length) continue;
                 for (let z = 0; z < attrValues.length - 1; z++) {
@@ -88,12 +95,5 @@ export class PIDataIntegrator {
         }
 
         return {fixedData, plotData};
-    }
-
-    async getValues(webId: string, params?: any) {
-        const path = `streamsets/${webId}/value`;
-        const url = this.buildUrl(path, params);
-        const plot = await this.fetch(url);
-        return plot;
     }
 }

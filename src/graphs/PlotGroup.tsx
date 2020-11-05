@@ -18,7 +18,7 @@ export const PlotGroup = props => {
             const lineData: any = [];
             const points = parsedData.map((d, i) => {
                 const time = i; //new Date(d['Timestamp']);
-                const usage = parseFloat(d['Value']);
+                const usage = parseFloat(d['Value'].toFixed(2));
                 return {x: time, y: usage};
             });
             lineData.push({id: title, color: 'hsl(249, 70%, 50%)', data: points});
@@ -27,7 +27,7 @@ export const PlotGroup = props => {
         } else if (BAR_PLOTS.includes(title)) {
             const barData = parsedData.map(d => {
                 const time = new Date(d['Timestamp']).toLocaleDateString();
-                const usage = parseFloat(d['Value']);
+                const usage = parseFloat(d['Value'].toFixed(2));
                 return {time, usage};
             });
             if (!barData || barData.length == 0) continue;

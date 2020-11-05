@@ -55,9 +55,6 @@ export class DataTable extends React.Component<IPropDataTable, IStateDataTable> 
     }
 
     render() {
-        //for (const selectedObject of this.props.selectedObjects) {
-        //  const { sheetData } = selectedObject;
-        //}
         const {isLoading, fixedData, plotData} = this.state;
 
         let ui: JSX.Element;

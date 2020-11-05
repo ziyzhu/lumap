@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {Drawer, Button, Classes, Position} from '@blueprintjs/core';
 import {BuildingDataObject} from '../api/Mapper';
-//import {SearchBar} from '../components/SearchBar';
+import {SearchBar} from '../components/SearchBar';
 
 interface IProps {
     selectedObjects?: BuildingDataObject[];
@@ -36,7 +36,7 @@ export default class DrawerComponent extends React.Component<IProps> {
                 </Button>
                 <Drawer onClose={this.handleClose} title="Lehigh University Campus Map" {...this.state}>
                     <div className={Classes.DRAWER_BODY}>
-                        {/*<SearchBar />*/}
+                        <SearchBar />
                         <div className={Classes.DIALOG_BODY}></div>
                     </div>
                     <div className={Classes.DRAWER_FOOTER}>

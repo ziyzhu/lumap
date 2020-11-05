@@ -5,6 +5,7 @@ import {PIDataIntegrator} from '../api/PIDataIntegrator';
 export class BuildingDataObject {
     key: string;
     name: string;
+    buildingType: string;
     piWebId?: string;
     sheetData?: any;
     constructor(key: string) {
@@ -25,39 +26,38 @@ export class BuildingMapper {
     }
 
     public async init(imodel: IModelConnection) {
-        this.ecToKeyTable = await this.createEcToKeyTable(imodel);
-        this.keyToEcTable = this.createKeyToEcTable();
-        this.keyToDataTable = await this.createKeyToDataTable();
+        await this.initTables(imodel);
         BuildingMapper.current = this;
         await this.addPiData();
         this.addSheetData();
     }
 
-    public async createEcToKeyTable(imodel: IModelConnection) {
+    public async initTables(imodel: IModelConnection) {
         const adaptor = (s: string) => s.replace(/^0+/, '');
+
         const ecToKeyTable: {[ecInstanceId: string]: string} = {};
-        const imodelBuildings = await this.asyncQuery(imodel, 'select * from DgnCustomItemTypes_Building.Building__x0020__InformationElementAspect;');
-        console.log(imodelBuildings);
-        for (const building of imodelBuildings) {
-            ecToKeyTable[building.element.id] = adaptor(building.building__x0020__Number);
-        }
-        return ecToKeyTable;
-    }
-
-    public createKeyToEcTable() {
-        const keyToEcTable = {};
-        Object.keys(this.ecToKeyTable).forEach(key => {
-            keyToEcTable[this.ecToKeyTable[key]] = key;
-        });
-        return keyToEcTable;
-    }
-
-    public async createKeyToDataTable() {
         const keyToDataTable: {[matchingKey: string]: BuildingDataObject} = {};
-        for (const key in this.keyToEcTable) {
+
+        const query = 'select * from DgnCustomItemTypes_Building.Building__x0020__InformationElementAspect where Building__x0020__Number \!\= \'\' and Building__x0020__Name \!\= \'\' and Building__x0020__Type \!\= \'\'';
+        const imodelBuildings = await this.asyncQuery(imodel, query);
+        console.log(imodelBuildings)
+        for (const building of imodelBuildings) {
+            const key = adaptor(building.building__x0020__Number);
+            ecToKeyTable[building.element.id] = key;
             keyToDataTable[key] = new BuildingDataObject(key);
+            keyToDataTable[key].name = building.building__x0020__Name;
+            keyToDataTable[key].buildingType = building.building__x0020__Type;
         }
-        return keyToDataTable;
+        console.log(keyToDataTable)
+
+        const keyToEcTable = {};
+        Object.keys(ecToKeyTable).forEach(key => {
+            keyToEcTable[ecToKeyTable[key]] = key;
+        });
+
+        this.keyToDataTable = keyToDataTable;
+        this.keyToEcTable = keyToEcTable;
+        this.ecToKeyTable = ecToKeyTable;
     }
 
     public async asyncQuery(imodel: IModelConnection, q: string): Promise<any[]> {
