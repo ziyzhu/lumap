@@ -1,5 +1,5 @@
 import {IModelConnection} from '@bentley/imodeljs-frontend';
-import GoogleConfig from '../api/GoogleConfig';
+// import GoogleConfig from '../api/GoogleConfig';
 import {PIDataIntegrator} from '../api/PIDataIntegrator';
 
 export class BuildingDataObject {
@@ -29,7 +29,7 @@ export class BuildingMapper {
         await this.initTables(imodel);
         BuildingMapper.current = this;
         await this.addPiData();
-        this.addSheetData();
+        // this.addSheetData();
     }
 
     public async initTables(imodel: IModelConnection) {
@@ -43,7 +43,6 @@ export class BuildingMapper {
         console.log(imodelBuildings)
         for (const building of imodelBuildings) {
             const key = adaptor(building.building__x0020__Number);
-            //const key = building.building__x0020__Number;
             ecToKeyTable[building.element.id] = key;
             keyToDataTable[key] = new BuildingDataObject(key);
             keyToDataTable[key].name = building.building__x0020__Name;
@@ -112,6 +111,7 @@ export class BuildingMapper {
     }
 
     // TODO integrate Doug's google sheet data here
+    /*
     addSheetData() {
         const mergeData = (sheetData: any) => {
             if (this.keyToDataTable[sheetData.matchingKey]) {
@@ -160,4 +160,5 @@ export class BuildingMapper {
 
         window.gapi.load('client', initClient);
     }
+    */
 }
