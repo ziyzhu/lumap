@@ -11,6 +11,8 @@ interface IStateDataTable {
     plotParams: any;
     fixedData: any;
     plotData: any;
+    missingObjects: any[];
+    isEmpty: boolean;
     isLoading: boolean;
     isGroup: boolean;
 }
@@ -25,8 +27,10 @@ export class DataTable extends React.Component<IPropDataTable, IStateDataTable> 
             },
             fixedData: {},
             plotData: {},
-            isGroup: false,
+            missingObjects: [],
+            isEmpty: false,
             isLoading: true,
+            isGroup: false,
         };
     }
 
@@ -34,15 +38,19 @@ export class DataTable extends React.Component<IPropDataTable, IStateDataTable> 
         const proxyUrl = 'https://lehighmap.csb.lehigh.edu:5000/api/piwebapi';
         const baseUrl = 'https://pi-core.cc.lehigh.edu/piwebapi';
         const integrator = new PIDataIntegrator(proxyUrl, baseUrl);
-        const { selectedObjects } = this.props;
-        const { plotParams } = this.state;
-        if (!selectedObjects) return;
+        const {selectedObjects} = this.props;
+        const presentObjects = selectedObjects.filter(obj => obj.piWebId !== undefined);
+        const missingObjects = selectedObjects.filter(obj => obj.piWebId === undefined);
+        const {plotParams} = this.state;
+        if (!presentObjects || presentObjects.length === 0) {
+            this.setState({isLoading: false, isEmpty: true, missingObjects: missingObjects});
+        }
 
         const promises = new Array<Promise<any>>();
         const plots: any = [];
-        for (const selectedObject of selectedObjects) {
-            if (!selectedObject.piWebId) continue;
-            promises.push(integrator.getPlot(selectedObject.piWebId, plotParams).then(plot => plots.push(plot)));
+        for (const presentObject of presentObjects) {
+            if (!presentObject.piWebId) continue;
+            promises.push(integrator.getPlot(presentObject.piWebId, plotParams).then(plot => plots.push(plot)));
         }
 
         Promise.all(promises)
@@ -55,13 +63,18 @@ export class DataTable extends React.Component<IPropDataTable, IStateDataTable> 
     }
 
     render() {
-        const {isLoading, fixedData, plotData} = this.state;
+        const {isLoading, isEmpty, missingObjects, fixedData, plotData} = this.state;
 
         let ui: JSX.Element;
         if (isLoading) {
             ui = <Spinner size={Spinner.SIZE_STANDARD} />;
+        } else if (!isEmpty) {
+            ui = (<div> 
+                    {/*<p>Buildings with missing data: {missingObjects.map(obj => obj.name).join(', ')}</p>*/}
+                    <PlotGroup data={plotData} size={[900, 500]} /> 
+                  </div>);
         } else {
-            ui = <PlotGroup data={plotData} size={[900, 500]}/>;
+            ui = <p>Empty : (</p>;
         }
         return ui;
     }

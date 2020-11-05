@@ -43,6 +43,7 @@ export class BuildingMapper {
         console.log(imodelBuildings)
         for (const building of imodelBuildings) {
             const key = adaptor(building.building__x0020__Number);
+            //const key = building.building__x0020__Number;
             ecToKeyTable[building.element.id] = key;
             keyToDataTable[key] = new BuildingDataObject(key);
             keyToDataTable[key].name = building.building__x0020__Name;
