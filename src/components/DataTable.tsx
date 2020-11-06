@@ -39,8 +39,8 @@ export class DataTable extends React.Component<IPropDataTable, IStateDataTable> 
         const baseUrl = 'https://pi-core.cc.lehigh.edu/piwebapi';
         const integrator = new PIDataIntegrator(proxyUrl, baseUrl);
         const {selectedObjects} = this.props;
-        const presentObjects = selectedObjects.filter(obj => obj.piWebId !== undefined);
-        const missingObjects = selectedObjects.filter(obj => obj.piWebId === undefined);
+        const presentObjects = selectedObjects.filter(obj => obj && obj.piWebId !== undefined);
+        const missingObjects = selectedObjects.filter(obj => obj && obj.piWebId === undefined);
         const {plotParams} = this.state;
         if (!presentObjects || presentObjects.length === 0) {
             this.setState({isLoading: false, isEmpty: true, missingObjects: missingObjects});

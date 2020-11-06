@@ -40,7 +40,6 @@ export class BuildingMapper {
 
         const query = 'select * from DgnCustomItemTypes_Building.Building__x0020__InformationElementAspect where Building__x0020__Number \!\= \'\' and Building__x0020__Name \!\= \'\' and Building__x0020__Type \!\= \'\'';
         const imodelBuildings = await this.asyncQuery(imodel, query);
-        console.log(imodelBuildings)
         for (const building of imodelBuildings) {
             const key = adaptor(building.building__x0020__Number);
             ecToKeyTable[building.element.id] = key;
@@ -48,7 +47,6 @@ export class BuildingMapper {
             keyToDataTable[key].name = building.building__x0020__Name;
             keyToDataTable[key].buildingType = building.building__x0020__Type;
         }
-        console.log(keyToDataTable)
 
         const keyToEcTable = {};
         Object.keys(ecToKeyTable).forEach(key => {
