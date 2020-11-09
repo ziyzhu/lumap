@@ -8,9 +8,12 @@ const BAR_PLOTS = ['Daily Energy', 'Daily Power', 'Monthly Average Watts'];
 export const PlotGroup = props => {
     const [containerWidth, containerHeight] = props.size;
     const plots: any[] = [];
+    console.log(props.fixedData);
+    console.log(props.plotData);
 
-    for (const title in props.data) {
-        const rawData = props.data[title];
+    for (const title in props.plotData) {
+
+        const rawData = props.plotData[title];
         const parsedData = rawData.filter(d => d['Value'] !== undefined && typeof d['Value'] === 'number');
 
         let plot;
@@ -23,7 +26,7 @@ export const PlotGroup = props => {
             });
             lineData.push({id: title, color: 'hsl(249, 70%, 50%)', data: points});
             if (!lineData || !points || points.length == 0) continue;
-            plot = <LinePlot data={lineData}/>
+            plot = <LinePlot data={lineData} header={title} />;
         } else if (BAR_PLOTS.includes(title)) {
             const barData = parsedData.map(d => {
                 const time = new Date(d['Timestamp']).toLocaleDateString();
@@ -31,7 +34,7 @@ export const PlotGroup = props => {
                 return {time, usage};
             });
             if (!barData || barData.length == 0) continue;
-            plot = <BarPlot data={barData}/>
+            plot = <BarPlot data={barData} header={title} />;
         }
         if (!plot) continue;
         plots.push(plot);
@@ -40,7 +43,7 @@ export const PlotGroup = props => {
     return (
         <>
             {plots.map(plot => (
-                <div style={{width: containerWidth, height: containerHeight}}>{plot}</div>
+                <div style={{width: containerWidth, height: containerHeight, margin: 'auto'}}>{plot}</div>
             ))}
         </>
     );

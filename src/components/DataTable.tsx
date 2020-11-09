@@ -69,10 +69,12 @@ export class DataTable extends React.Component<IPropDataTable, IStateDataTable> 
         if (isLoading) {
             ui = <Spinner size={Spinner.SIZE_STANDARD} />;
         } else if (!isEmpty) {
-            ui = (<div> 
+            ui = (
+                <div>
                     {/*<p>Buildings with missing data: {missingObjects.map(obj => obj.name).join(', ')}</p>*/}
-                    <PlotGroup data={plotData} size={[900, 500]} /> 
-                  </div>);
+                    <PlotGroup fixedData={fixedData} plotData={plotData} size={[900, 500]} />
+                </div>
+            );
         } else {
             ui = <p>Empty : (</p>;
         }
