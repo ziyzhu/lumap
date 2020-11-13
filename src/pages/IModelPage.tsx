@@ -183,7 +183,7 @@ class IModelContent extends React.Component<{}, IStateImodelContent> {
 
     private _onStartSignin = async () => {
         this.setState(prev => ({user: {...prev.user, isLoading: true}}));
-        // AppClient.oidcClient.signIn(new FrontendRequestContext());
+        AppClient.oidcClient.signIn(new FrontendRequestContext());
     };
 
     private _onUserStateChanged = () => {
