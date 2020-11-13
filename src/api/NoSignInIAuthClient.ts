@@ -42,9 +42,8 @@ export class NoSignInIAuthClient implements FrontendAuthorizationClient {
 
         const response = await fetch('https://lehighmap.csb.lehigh.edu:5000/api/token');
         const {token} = await response.json();
-        token._userInfo = { id: "MockId" };
+        token._userInfo = {id: 'MockId'};
         const accessToken = AccessToken.fromJson(token);
-        console.log(token);
         this._accessToken = accessToken;
 
         setTimeout(() => {

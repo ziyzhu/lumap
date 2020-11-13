@@ -100,7 +100,7 @@ class IModelContent extends React.Component<{}, IStateImodelContent> {
             const info = await this._getIModelInfo();
             imodel = await RemoteBriefcaseConnection.open(info.projectId, info.imodelId, OpenMode.Readonly);
         } catch (e) {
-            alert(e.message);
+            console.log(e.message);
         }
         await this._onIModelSelected(imodel);
     };
