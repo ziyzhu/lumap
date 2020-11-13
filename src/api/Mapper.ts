@@ -4,6 +4,7 @@ import {PIDataIntegrator} from '../api/PIDataIntegrator';
 
 export class BuildingDataObject {
     key: string;
+    ecId: string;
     name: string;
     buildingType: string;
     piWebId?: string;
@@ -14,15 +15,17 @@ export class BuildingDataObject {
 }
 
 export class BuildingMapper {
-    public ecToKeyTable;
-    public keyToEcTable: {};
+    public ecToKeyTable: {[ecId: string]: string};
+    public keyToEcTable: {[key: string]: string};
     public keyToDataTable: {[key: string]: BuildingDataObject};
+    public ecToWebIdTable: {[ecId: string]: string};
     static current;
 
     constructor() {
         this.ecToKeyTable = {};
         this.keyToDataTable = {};
         this.keyToEcTable = {};
+        this.ecToWebIdTable = {};
     }
 
     public async init(imodel: IModelConnection) {
@@ -38,7 +41,7 @@ export class BuildingMapper {
         const ecToKeyTable: {[ecInstanceId: string]: string} = {};
         const keyToDataTable: {[matchingKey: string]: BuildingDataObject} = {};
 
-        const query = 'select * from DgnCustomItemTypes_Building.Building__x0020__InformationElementAspect where Building__x0020__Number \!\= \'\' and Building__x0020__Name \!\= \'\' and Building__x0020__Type \!\= \'\'';
+        const query = "select * from DgnCustomItemTypes_Building.Building__x0020__InformationElementAspect where Building__x0020__Number != '' and Building__x0020__Name != '' and Building__x0020__Type != ''";
         const imodelBuildings = await this.asyncQuery(imodel, query);
         for (const building of imodelBuildings) {
             const key = adaptor(building.building__x0020__Number);
@@ -46,6 +49,7 @@ export class BuildingMapper {
             keyToDataTable[key] = new BuildingDataObject(key);
             keyToDataTable[key].name = building.building__x0020__Name;
             keyToDataTable[key].buildingType = building.building__x0020__Type;
+            keyToDataTable[key].ecId = building.element.id;
         }
 
         const keyToEcTable = {};
@@ -94,10 +98,6 @@ export class BuildingMapper {
     }
 
     async addPiData() {
-        const proxyUrl = 'https://lehighmap.csb.lehigh.edu:5000/api/piwebapi';
-        const baseUrl = 'https://pi-core.cc.lehigh.edu/piwebapi';
-        const integrator = new PIDataIntegrator(proxyUrl, baseUrl);
-
         const rawResponse = await fetch('https://lehighmap.csb.lehigh.edu:5000/api/webidmap');
         const parsedResponse: any = await rawResponse.json();
         const piWebIdMap = parsedResponse;

@@ -163,7 +163,10 @@ class IModelContent extends React.Component<{}, IStateImodelContent> {
                 selection.instanceKeys.forEach((ids, ecclass) => {
                     if (BuildingMapper.current) {
                         const selectedObjects = BuildingMapper.current.getDataFromEcSet(ids);
-                        const toastMessage = selectedObjects.filter(obj => obj !== undefined).map(obj => `${obj.name} (${obj.buildingType})`).join(', ');
+                        const toastMessage = selectedObjects
+                            .filter(obj => obj !== undefined && obj.piWebId !== undefined)
+                            .map(obj => `${obj.name} (${obj.buildingType})`)
+                            .join(', ');
                         this.addToast(this.createToast(toastMessage));
                         this.setState({selectedObjects: BuildingMapper.current.getDataFromEcSet(ids)});
                     }

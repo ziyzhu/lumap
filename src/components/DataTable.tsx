@@ -76,7 +76,7 @@ export class DataTable extends React.Component<IPropDataTable, IStateDataTable> 
                 </div>
             );
         } else {
-            ui = <p>Empty : (</p>;
+            ui = <h1>No Data Available</h1>;
         }
         return ui;
     }

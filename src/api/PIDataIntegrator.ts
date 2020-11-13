@@ -93,7 +93,6 @@ export class PIDataIntegrator {
             }
             attrIndex += 1;
         }
-
         return {fixedData, plotData};
     }
 }
