@@ -3,9 +3,10 @@ import {ElectronRpcConfiguration} from '@bentley/imodeljs-common';
 import {OpenMode, Logger, LogLevel, Id64, Id64String} from '@bentley/bentleyjs-core';
 import {ContextRegistryClient, Project} from '@bentley/context-registry-client';
 import {IModelQuery} from '@bentley/imodelhub-client';
-import {AccessToken} from '@bentley/imodeljs-clients';
+// import {AccessToken} from '@bentley/imodeljs-clients';
 import {IModelApp, IModelConnection, FrontendRequestContext, AuthorizedFrontendRequestContext, SpatialViewState, DrawingViewState, RemoteBriefcaseConnection} from '@bentley/imodeljs-frontend';
 import {Presentation, SelectionChangeEventArgs, ISelectionProvider} from '@bentley/presentation-frontend';
+import {AccessToken, ImsAuthorizationClient, AuthorizedClientRequestContext} from '@bentley/itwin-client';
 import {SignIn} from '../components/SignIn';
 import {Spinner, Position, Intent, IToastProps, Toaster} from '@blueprintjs/core';
 import {SimpleViewportComponent} from '../components/Viewport';
@@ -76,8 +77,6 @@ class IModelContent extends React.Component<{}, IStateImodelContent> {
             dataTableIsOpen: false,
         };
         IModelApp.viewManager.onViewOpen.addOnce(vp => {
-            //vp.changeBackgroundMapProps({applyTerrain: true});
-            //vp.changeBackgroundMapProps({groundBias:-100});
             const viewFlags = vp.viewFlags.clone();
             viewFlags.shadows = false;
             vp.viewFlags = viewFlags;
@@ -98,13 +97,10 @@ class IModelContent extends React.Component<{}, IStateImodelContent> {
     private _openIModel = async () => {
         let imodel: IModelConnection | undefined;
         try {
-            // attempt to open the imodel
-            // const info = await this._getIModelInfo();
-            // imodel = await IModelConnection.open(info.projectId, info.imodelId, OpenMode.Readonly);
             const info = await this._getIModelInfo();
             imodel = await RemoteBriefcaseConnection.open(info.projectId, info.imodelId, OpenMode.Readonly);
         } catch (e) {
-            console.log(e.message);
+            console.log(e);
         }
         await this._onIModelSelected(imodel);
     };
@@ -113,7 +109,8 @@ class IModelContent extends React.Component<{}, IStateImodelContent> {
         const projectName = AppConfig.imjs_project_name;
         const imodelName = AppConfig.imjs_imodel_name;
 
-        const requestContext: AuthorizedFrontendRequestContext = await AuthorizedFrontendRequestContext.create();
+        // const requestContext: AuthorizedFrontendRequestContext = await AuthorizedFrontendRequestContext.create();
+        const requestContext = AppClient.requestContext;
 
         const connectClient = new ContextRegistryClient();
         let project: Project;
@@ -163,7 +160,10 @@ class IModelContent extends React.Component<{}, IStateImodelContent> {
                 selection.instanceKeys.forEach((ids, ecclass) => {
                     if (BuildingMapper.current) {
                         const selectedObjects = BuildingMapper.current.getDataFromEcSet(ids);
-                        const toastMessage = selectedObjects.filter(obj => obj !== undefined).map(obj => `${obj.name} (${obj.buildingType})`).join(', ');
+                        const toastMessage = selectedObjects
+                            .filter(obj => obj !== undefined)
+                            .map(obj => `${obj.name} (${obj.buildingType})`)
+                            .join(', ');
                         this.addToast(this.createToast(toastMessage));
                         this.setState({selectedObjects: BuildingMapper.current.getDataFromEcSet(ids)});
                     }
@@ -184,10 +184,11 @@ class IModelContent extends React.Component<{}, IStateImodelContent> {
 
     private _onStartSignin = async () => {
         this.setState(prev => ({user: {...prev.user, isLoading: true}}));
-        AppClient.oidcClient.signIn(new FrontendRequestContext());
+        // AppClient.oidcClient.signIn(new FrontendRequestContext());
     };
 
     private _onUserStateChanged = () => {
+        console.log(AppClient.oidcClient.isAuthorized);
         this.setState(prev => ({user: {...prev.user, isAuthorized: AppClient.oidcClient.isAuthorized, isLoading: false}}));
     };
 
@@ -257,12 +258,12 @@ class IModelContent extends React.Component<{}, IStateImodelContent> {
             ui = (
                 <div className="page-center">
                     <Spinner size={Spinner.SIZE_STANDARD} />
-                    <p>Signing you in...</p>
+                    <p>Authenticating network...</p>
                 </div>
             );
-        } else if (!AppClient.oidcClient.hasSignedIn && !this.state.offlineIModel) {
-            if (ElectronRpcConfiguration.isElectron) ui = <SignIn onSignIn={this._onStartSignin} onRegister={this._onRegister} onOffline={this._onOffline} />;
-            else ui = <SignIn onSignIn={this._onStartSignin} onRegister={this._onRegister} />;
+            // } else if (!AppClient.oidcClient.hasSignedIn && !this.state.offlineIModel) {
+            //    if (ElectronRpcConfiguration.isElectron) ui = <SignIn onSignIn={this._onStartSignin} onRegister={this._onRegister} onOffline={this._onOffline} />;
+            //    else ui = <SignIn onSignIn={this._onStartSignin} onRegister={this._onRegister} />;
         } else if (!this.state.imodel || !this.state.viewDefinitionId) {
             ui = (
                 <div className="page-center">
