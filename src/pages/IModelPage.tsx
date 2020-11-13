@@ -100,7 +100,7 @@ class IModelContent extends React.Component<{}, IStateImodelContent> {
             const info = await this._getIModelInfo();
             imodel = await RemoteBriefcaseConnection.open(info.projectId, info.imodelId, OpenMode.Readonly);
         } catch (e) {
-            console.log(e);
+            alert(e.message);
         }
         await this._onIModelSelected(imodel);
     };
@@ -109,8 +109,7 @@ class IModelContent extends React.Component<{}, IStateImodelContent> {
         const projectName = AppConfig.imjs_project_name;
         const imodelName = AppConfig.imjs_imodel_name;
 
-        // const requestContext: AuthorizedFrontendRequestContext = await AuthorizedFrontendRequestContext.create();
-        const requestContext = AppClient.requestContext;
+        const requestContext: AuthorizedFrontendRequestContext = await AuthorizedFrontendRequestContext.create();
 
         const connectClient = new ContextRegistryClient();
         let project: Project;

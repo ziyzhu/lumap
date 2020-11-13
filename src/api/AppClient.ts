@@ -9,14 +9,13 @@ import {AccessToken, ImsAuthorizationClient, AuthorizedClientRequestContext} fro
 import {Presentation} from '@bentley/presentation-frontend';
 import {UiComponents} from '@bentley/ui-components';
 import * as AppConfig from './AppConfig.json';
-import {MyBrowserAuthorizationClient} from './MyBrowserAuthorizationClient';
+import {NoSignInIAuthClient} from './NoSignInIAuthClient';
 
 export function getSupportedRpcs(): RpcInterfaceDefinition[] {
     return [IModelReadRpcInterface, IModelTileRpcInterface, PresentationRpcInterface, SnapshotIModelRpcInterface];
 }
 
 export class AppClient {
-
     private static _isReady: Promise<void>;
     public static requestContext: AuthorizedClientRequestContext;
 
@@ -28,14 +27,7 @@ export class AppClient {
         return this._isReady;
     }
 
-    public static async startup() {    
-        const response = await fetch('https://lehighmap.csb.lehigh.edu:5000/api/token');
-        const {token} = await response.json();
-        const accessToken = AccessToken.fromJson(token);
-        //const requestContext = new AuthorizedClientRequestContext(accessToken);
-        const requestContext = new AuthorizedFrontendRequestContext(accessToken);
-        this.requestContext = requestContext;
-
+    public static async startup() {
         await IModelApp.startup();
         await AppClient.initializeOidc();
         const initPromises = new Array<Promise<any>>();
@@ -56,41 +48,19 @@ export class AppClient {
     }
 
     private static async initializeOidc() {
-        // const clientId = AppConfig.imjs_browser_client_id;
-        const clientId = 'service-gc2YA01UngeIXZfeNvXtUkuoF';
-        const redirectUri = AppConfig.imjs_browser_redirect_uri;
-        // const scope = AppConfig.imjs_browser_scope;
-        const scope = 'imodelhub context-registry-service:read-only urlps-third-party';
-        const postSignoutRedirectUri = '';
-        // const oidcConfiguration: BrowserAuthorizationClientConfiguration = {clientId, redirectUri, postSignoutRedirectUri, scope: scope + ' imodeljs-router', responseType: 'code'};
-        const oidcConfiguration: BrowserAuthorizationClientConfiguration = {clientId, redirectUri, postSignoutRedirectUri, scope: scope, responseType: 'code'};
-        IModelApp.authorizationClient = new MyBrowserAuthorizationClient(oidcConfiguration);
-        IModelApp.authorizationClient.onUserStateChanged.raiseEvent(this.requestContext.accessToken);
-        // (IModelApp.authorizationClient as MyBrowserAuthorizationClient).setAccessToken(this.requestContext.accessToken);
-    }
-
-    /*
-    private static async initializeOidc() {
-        const clientId = AppConfig.imjs_browser_client_id;
-        const redirectUri = AppConfig.imjs_browser_redirect_uri;
-        const scope = AppConfig.imjs_browser_scope;
-        const postSignoutRedirectUri = '';
-        const oidcConfiguration: BrowserAuthorizationClientConfiguration = {clientId, redirectUri, postSignoutRedirectUri, scope: scope + ' imodeljs-router', responseType: 'code'};
-        await BrowserAuthorizationCallbackHandler.handleSigninCallback(oidcConfiguration.redirectUri);
-        IModelApp.authorizationClient = new BrowserAuthorizationClient(oidcConfiguration);
+        const authClient = new NoSignInIAuthClient();
+        await authClient.generateTokenString(new ClientRequestContext());
+        IModelApp.authorizationClient = authClient;
         try {
-            await (AppClient.oidcClient as BrowserAuthorizationClient).signInSilent(this.requestContext);
-            AppClient.oidcClient.onUserStateChanged.raiseEvent(accessToken);
+            AppClient.oidcClient.signIn(new ClientRequestContext());
         } catch (err) {
             console.log(err);
         }
     }
-    */
 
     private static async getConnectionInfo(): Promise<BentleyCloudRpcParams | undefined> {
         const urlClient = new UrlDiscoveryClient();
-        // const requestContext = new FrontendRequestContext();
-        const requestContext = this.requestContext;
+        const requestContext = new FrontendRequestContext();
         const orchestratorUrl = await urlClient.discoverUrl(requestContext, 'iModelJsOrchestrator.K8S', undefined);
         return {info: {title: 'general-purpose-imodeljs-backend', version: 'v2.0'}, uriPrefix: orchestratorUrl};
     }
