@@ -3,7 +3,6 @@ import {ElectronRpcConfiguration} from '@bentley/imodeljs-common';
 import {OpenMode, Logger, LogLevel, Id64, Id64String} from '@bentley/bentleyjs-core';
 import {ContextRegistryClient, Project} from '@bentley/context-registry-client';
 import {IModelQuery} from '@bentley/imodelhub-client';
-// import {AccessToken} from '@bentley/imodeljs-clients';
 import {IModelApp, IModelConnection, FrontendRequestContext, AuthorizedFrontendRequestContext, SpatialViewState, DrawingViewState, RemoteBriefcaseConnection} from '@bentley/imodeljs-frontend';
 import {Presentation, SelectionChangeEventArgs, ISelectionProvider} from '@bentley/presentation-frontend';
 import {AccessToken, ImsAuthorizationClient, AuthorizedClientRequestContext} from '@bentley/itwin-client';
@@ -42,7 +41,8 @@ export default class IModelPage extends React.Component<{}, IStateImodelPage> {
         return (
             <div className="page-center">
                 <Spinner size={Spinner.SIZE_STANDARD} />
-                <p>Initializing the app for you...</p>
+                <h3>Connecting to Lehigh Server...</h3>
+                <p>(You must be connected to the Lehigh University Network)</p>
             </div>
         );
     }
@@ -98,6 +98,7 @@ class IModelContent extends React.Component<{}, IStateImodelContent> {
         let imodel: IModelConnection | undefined;
         try {
             const info = await this._getIModelInfo();
+            console.log(info);
             imodel = await RemoteBriefcaseConnection.open(info.projectId, info.imodelId, OpenMode.Readonly);
         } catch (e) {
             console.log(e.message);
@@ -257,17 +258,14 @@ class IModelContent extends React.Component<{}, IStateImodelContent> {
             ui = (
                 <div className="page-center">
                     <Spinner size={Spinner.SIZE_STANDARD} />
-                    <p>Authenticating network...</p>
+                    <h3>Authenticating...</h3>
                 </div>
             );
-            // } else if (!AppClient.oidcClient.hasSignedIn && !this.state.offlineIModel) {
-            //    if (ElectronRpcConfiguration.isElectron) ui = <SignIn onSignIn={this._onStartSignin} onRegister={this._onRegister} onOffline={this._onOffline} />;
-            //    else ui = <SignIn onSignIn={this._onStartSignin} onRegister={this._onRegister} />;
         } else if (!this.state.imodel || !this.state.viewDefinitionId) {
             ui = (
                 <div className="page-center">
                     <Spinner size={Spinner.SIZE_STANDARD} />
-                    <p>Fetching Lehigh University Campus iModel...</p>
+                    <h3>Fetching Lehigh University Campus iModel...</h3>
                 </div>
             );
             this.delayedInitialization();
@@ -275,7 +273,7 @@ class IModelContent extends React.Component<{}, IStateImodelContent> {
             ui = (
                 <div className="page-center">
                     <Spinner size={Spinner.SIZE_STANDARD} />
-                    <p>Connecting data to iModel...</p>
+                    <h3>Connecting data to iModel...</h3>
                 </div>
             );
         } else {

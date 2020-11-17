@@ -66,7 +66,6 @@ export class AppClient {
     }
 
     public static shutdown() {
-        //this._oidcClient.dispose();
         IModelApp.shutdown();
     }
 }
