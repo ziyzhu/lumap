@@ -3,9 +3,9 @@ import {ElectronRpcConfiguration} from '@bentley/imodeljs-common';
 import {OpenMode, Logger, LogLevel, Id64, Id64String} from '@bentley/bentleyjs-core';
 import {ContextRegistryClient, Project} from '@bentley/context-registry-client';
 import {IModelQuery} from '@bentley/imodelhub-client';
-import {AccessToken} from '@bentley/imodeljs-clients';
 import {IModelApp, IModelConnection, FrontendRequestContext, AuthorizedFrontendRequestContext, SpatialViewState, DrawingViewState, RemoteBriefcaseConnection} from '@bentley/imodeljs-frontend';
 import {Presentation, SelectionChangeEventArgs, ISelectionProvider} from '@bentley/presentation-frontend';
+import {AccessToken, ImsAuthorizationClient, AuthorizedClientRequestContext} from '@bentley/itwin-client';
 import {SignIn} from '../components/SignIn';
 import {Spinner, Position, Intent, IToastProps, Toaster} from '@blueprintjs/core';
 import {SimpleViewportComponent} from '../components/Viewport';
@@ -41,7 +41,8 @@ export default class IModelPage extends React.Component<{}, IStateImodelPage> {
         return (
             <div className="page-center">
                 <Spinner size={Spinner.SIZE_STANDARD} />
-                <p>Initializing the app for you...</p>
+                <h3>Connecting to Lehigh Server...</h3>
+                <p>(You must be connected to the Lehigh University Network)</p>
             </div>
         );
     }
@@ -76,8 +77,6 @@ class IModelContent extends React.Component<{}, IStateImodelContent> {
             dataTableIsOpen: false,
         };
         IModelApp.viewManager.onViewOpen.addOnce(vp => {
-            //vp.changeBackgroundMapProps({applyTerrain: true});
-            //vp.changeBackgroundMapProps({groundBias:-100});
             const viewFlags = vp.viewFlags.clone();
             viewFlags.shadows = false;
             vp.viewFlags = viewFlags;
@@ -98,10 +97,8 @@ class IModelContent extends React.Component<{}, IStateImodelContent> {
     private _openIModel = async () => {
         let imodel: IModelConnection | undefined;
         try {
-            // attempt to open the imodel
-            // const info = await this._getIModelInfo();
-            // imodel = await IModelConnection.open(info.projectId, info.imodelId, OpenMode.Readonly);
             const info = await this._getIModelInfo();
+            console.log(info);
             imodel = await RemoteBriefcaseConnection.open(info.projectId, info.imodelId, OpenMode.Readonly);
         } catch (e) {
             console.log(e.message);
@@ -191,6 +188,7 @@ class IModelContent extends React.Component<{}, IStateImodelContent> {
     };
 
     private _onUserStateChanged = () => {
+        console.log(AppClient.oidcClient.isAuthorized);
         this.setState(prev => ({user: {...prev.user, isAuthorized: AppClient.oidcClient.isAuthorized, isLoading: false}}));
     };
 
@@ -260,17 +258,14 @@ class IModelContent extends React.Component<{}, IStateImodelContent> {
             ui = (
                 <div className="page-center">
                     <Spinner size={Spinner.SIZE_STANDARD} />
-                    <p>Signing you in...</p>
+                    <h3>Authenticating...</h3>
                 </div>
             );
-        } else if (!AppClient.oidcClient.hasSignedIn && !this.state.offlineIModel) {
-            if (ElectronRpcConfiguration.isElectron) ui = <SignIn onSignIn={this._onStartSignin} onRegister={this._onRegister} onOffline={this._onOffline} />;
-            else ui = <SignIn onSignIn={this._onStartSignin} onRegister={this._onRegister} />;
         } else if (!this.state.imodel || !this.state.viewDefinitionId) {
             ui = (
                 <div className="page-center">
                     <Spinner size={Spinner.SIZE_STANDARD} />
-                    <p>Fetching Lehigh University Campus iModel...</p>
+                    <h3>Fetching Lehigh University Campus iModel...</h3>
                 </div>
             );
             this.delayedInitialization();
@@ -278,7 +273,7 @@ class IModelContent extends React.Component<{}, IStateImodelContent> {
             ui = (
                 <div className="page-center">
                     <Spinner size={Spinner.SIZE_STANDARD} />
-                    <p>Connecting data to iModel...</p>
+                    <h3>Connecting data to iModel...</h3>
                 </div>
             );
         } else {
