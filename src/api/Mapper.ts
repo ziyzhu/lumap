@@ -1,5 +1,4 @@
 import {IModelConnection} from '@bentley/imodeljs-frontend';
-// import GoogleConfig from '../api/GoogleConfig';
 import {PIDataIntegrator} from '../api/PIDataIntegrator';
 
 export class BuildingDataObject {
@@ -32,7 +31,8 @@ export class BuildingMapper {
         await this.initTables(imodel);
         BuildingMapper.current = this;
         await this.addPiData();
-        // this.addSheetData();
+        // TODO to be completed
+        // this.addSheetData(); 
     }
 
     public async initTables(imodel: IModelConnection) {
@@ -108,14 +108,16 @@ export class BuildingMapper {
         }
     }
 
-    // TODO integrate Doug's google sheet data here
-    /*
     addSheetData() {
         const mergeData = (sheetData: any) => {
             if (this.keyToDataTable[sheetData.matchingKey]) {
                 this.keyToDataTable[sheetData.matchingKey].sheetData = sheetData;
             }
         };
+
+        const response = await fetch('https://lehighmap.csb.lehigh.edu:5000/api/spreadsheet');
+        const responseJson = await response.json();
+        const spreadsheetCred = responseJson['credentials'];
 
         const handler = (response, error) => {
             console.log('Error: ' + JSON.stringify(error));
@@ -130,7 +132,7 @@ export class BuildingMapper {
             window.gapi.client.load('sheets', 'v4', () => {
                 window.gapi.client.sheets.spreadsheets.values
                     .get({
-                        spreadsheetId: GoogleConfig.spreadsheetId,
+                        spreadsheetId: spreadsheetCred.spreadsheetId,
                         range: 'Sheet1!A1:T',
                     })
                     .then(
@@ -148,8 +150,8 @@ export class BuildingMapper {
         const initClient = () => {
             window.gapi.client
                 .init({
-                    apiKey: GoogleConfig.apiKey,
-                    discoveryDocs: GoogleConfig.discoveryDocs,
+                    apiKey: spreadsheetCred.apiKey,
+                    discoveryDocs: spreadsheetCred.discoveryDocs,
                 })
                 .then(() => {
                     load(handler);
@@ -158,5 +160,4 @@ export class BuildingMapper {
 
         window.gapi.load('client', initClient);
     }
-    */
 }
