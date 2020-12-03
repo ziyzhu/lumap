@@ -22,7 +22,7 @@ export class DataTable extends React.Component<IPropDataTable, IStateDataTable> 
         super(props);
         this.state = {
             plotParams: {
-                startTime: '*-1w',
+                startTime: '*-4w',
                 endTime: '*',
             },
             fixedData: {},
