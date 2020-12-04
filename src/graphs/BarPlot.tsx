@@ -10,18 +10,18 @@ export const BarPlot = props => {
                 data={barData}
                 indexBy="time"
                 keys={['usage']}
-                margin={{top: 50, right: 130, bottom: 50, left: 60}}
-                colors={{scheme: 'nivo'}}
+                margin={{top: 50, right: 0, bottom: 50, left: 60}}
+                colors={{scheme: 'paired'}}
                 borderColor={{from: 'color', modifiers: [['darker', 1.6]]}}
                 axisTop={null}
                 axisRight={null}
                 axisBottom={{
-                    tickSize: 5,
-                    tickPadding: 5,
+                    tickSize: 10,
+                    tickPadding: 2,
                     tickRotation: 0,
                     legend: 'Time',
                     legendPosition: 'middle',
-                    legendOffset: 32,
+                    legendOffset:36,
                 }}
                 axisLeft={{
                     tickSize: 5,
@@ -58,6 +58,7 @@ export const BarPlot = props => {
                         ],
                     },
                 ]}
+
                 animate={true}
                 motionStiffness={90}
                 motionDamping={15}

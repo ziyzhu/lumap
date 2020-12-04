@@ -8,7 +8,9 @@ export const LinePlot = props => {
             <h1 style={{'textAlign': 'center', 'marginBottom': '0', 'marginTop': '30px'}}>{props.header}</h1>
             <ResponsiveLine
                 data={lineData}
-                margin={{top: 50, right: 110, bottom: 50, left: 60}}
+                colors={{ scheme: 'paired' }}
+                enableArea={true}
+                margin={{top: 50, right: 0, bottom: 50, left: 60}}
                 xScale={{type: 'linear'}}
                 yScale={{
                     type: 'linear',
