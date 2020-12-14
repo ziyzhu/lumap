@@ -10,28 +10,28 @@ export const BarPlot = props => {
                 data={barData}
                 indexBy="time"
                 keys={['usage']}
-                margin={{top: 50, right: 0, bottom: 50, left: 60}}
+                margin={{top: 50, right: 0, bottom: 76, left: 60}}
                 colors={{scheme: 'paired'}}
                 borderColor={{from: 'color', modifiers: [['darker', 1.6]]}}
                 axisTop={null}
                 axisRight={null}
                 axisBottom={{
-                    tickSize: 10,
-                    tickPadding: 2,
-                    tickRotation: 0,
-                    legend: 'Time',
+                    tickSize: 0,
+                    tickPadding: 1,
+                    tickRotation: -90,
+                    legend: 'Date',
                     legendPosition: 'middle',
-                    legendOffset:36,
+                    legendOffset:70,
                 }}
                 axisLeft={{
-                    tickSize: 5,
+                    tickSize: 2,
                     tickPadding: 5,
                     tickRotation: 0,
-                    legend: 'Usage',
+                    legend: 'Energy Usage Value',
                     legendPosition: 'middle',
                     legendOffset: -40,
                 }}
-                labelSkipWidth={12}
+                labelSkipWidth={5}
                 labelSkipHeight={12}
                 labelTextColor={{from: 'color', modifiers: [['darker', 1.6]]}}
                 legends={[
