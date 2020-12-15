@@ -29,23 +29,21 @@ export const handleUserEvent = (matchingKeys: string[], event: UserEvent) => {
   const viewport = IModelApp.viewManager.selectedView;
   const emph = EmphasizeElements.getOrCreate(viewport);
 
-  for (const ecId of ecIds) {
-      switch (event) {
-        case UserEvent.ZoomIn:
-          viewport.zoomToElements(ecId, {animateFrustumChange: true});
-          break;
-        case UserEvent.Highlight:
-          emph.overrideElements(ecId, viewport, ColorDef.red);
-          break;
-        case UserEvent.Isolate:
-          emph.isolateElements(ecId, viewport);
-          break;
-        case UserEvent.Clear:
-          EmphasizeElements.clear(viewport);
-          break;
+  switch (event) {
+    case UserEvent.ZoomIn:
+      viewport.zoomToElements(ecIds[0], {animateFrustumChange: true});
+      break;
+    case UserEvent.Highlight:
+      emph.overrideElements(ecIds, viewport, ColorDef.red);
+      break;
+    case UserEvent.Isolate:
+      emph.isolateElements(ecIds, viewport);
+      break;
+    case UserEvent.Clear:
+      EmphasizeElements.clear(viewport);
+      break;
 
-        default:
-          console.log('This event is not yet supported');
-      }
+    default:
+      console.log('This event is not yet supported');
   }
 };
