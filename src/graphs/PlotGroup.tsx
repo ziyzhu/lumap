@@ -6,8 +6,8 @@ import {MonthlyBarPlot} from './MonthlyBarPlot';
 const LINE_PLOTS = ['Amps A', 'Amps B', 'Amps C', 'Power Fac A', 'Power Fac B', 'Power Fac C', 'Watts Total'];
 
 const BAR_PLOTS = ['Daily Energy', 'Daily Power', 'Monthly Average Watts'];
-const DAILY_BAR_PLOTS = ['Daily Energy', 'Daily Power'];
-const MONTHLY_BAR_PLOTS = ['Monthly Average Watts'];
+const DAILY_BAR_PLOTS = ['Daily Energy'];
+const MONTHLY_BAR_PLOTS = ['Monthly Average Watts','Daily Power'];
 
 export const PlotGroup = props => {
     const [containerWidth, containerHeight] = props.size;

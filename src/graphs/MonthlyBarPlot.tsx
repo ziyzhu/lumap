@@ -25,9 +25,9 @@ export const MonthlyBarPlot = props => {
                 }}
                 axisLeft={{
                     tickSize: 2,
-                    tickPadding: 5,
+                    tickPadding: 0,
                     tickRotation: 0,
-                    legend: 'Energy Usage Value',
+                    legend: 'Energy Usage Value (kw)',
                     legendPosition: 'middle',
                     legendOffset: -40,
                 }}
