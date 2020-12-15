@@ -1,9 +1,13 @@
 import React, {useState, useEffect, useRef} from 'react';
 import {LinePlot} from './LinePlot';
-import {BarPlot} from './BarPlot';
+import {DailyBarPlot} from './DailyBarPlot';
+import {MonthlyBarPlot} from './MonthlyBarPlot';
 
 const LINE_PLOTS = ['Amps A', 'Amps B', 'Amps C', 'Power Fac A', 'Power Fac B', 'Power Fac C', 'Watts Total'];
+
 const BAR_PLOTS = ['Daily Energy', 'Daily Power', 'Monthly Average Watts'];
+const DAILY_BAR_PLOTS = ['Daily Energy', 'Daily Power'];
+const MONTHLY_BAR_PLOTS = ['Monthly Average Watts'];
 
 export const PlotGroup = props => {
     const [containerWidth, containerHeight] = props.size;
@@ -40,12 +44,20 @@ export const PlotGroup = props => {
 
             if (!barData || barData.length == 0) continue;
 
-            plot = (
-                <PlotContainer key={title} width={containerWidth} height={containerHeight}>
-                    <BarPlot data={barData} header={title} />
-                </PlotContainer>
-            );
-        }
+            if (DAILY_BAR_PLOTS.includes(title)) {
+                plot = (
+                    <PlotContainer key={title} width={containerWidth} height={containerHeight}>
+                        <DailyBarPlot data={barData} header={title} />
+                    </PlotContainer>
+                );
+            } else if (MONTHLY_BAR_PLOTS.includes(title)) {
+                plot = (
+                    <PlotContainer key={title} width={containerWidth} height={containerHeight}>
+                        <MonthlyBarPlot data={barData} header={title} />
+                    </PlotContainer>
+                );
+            }
+        } 
 
         if (!plot) continue;
         plots.push(plot);

@@ -1,11 +1,11 @@
 import {ResponsiveBar} from '@nivo/bar';
 import * as React from 'react';
 
-export const BarPlot = props => {
+export const MonthlyBarPlot = props => {
     const barData = props.data;
     return (
         <>
-            <h1 style={{'textAlign': 'center', 'marginBottom': '0', 'marginTop': '30px'}}>{props.header}</h1>
+            <h1 style={{textAlign: 'center', marginBottom: '0', marginTop: '30px'}}>{props.header}</h1>
             <ResponsiveBar
                 data={barData}
                 indexBy="time"
@@ -21,7 +21,7 @@ export const BarPlot = props => {
                     tickRotation: -90,
                     legend: 'Date',
                     legendPosition: 'middle',
-                    legendOffset:70,
+                    legendOffset: 70,
                 }}
                 axisLeft={{
                     tickSize: 2,
@@ -58,7 +58,6 @@ export const BarPlot = props => {
                         ],
                     },
                 ]}
-
                 animate={true}
                 motionStiffness={90}
                 motionDamping={15}
