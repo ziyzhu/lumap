@@ -80,6 +80,8 @@ export default function CheckBoxes() {
                 <Button
                     text="Isolate"
                     onClick={() => {
+                        // adapt filterBuilding method in Search Bar to filter buildings based on query
+                        // possible need to create a state of iModel buildings pulled from Mapper.ts
                         const checks: string[] = [];
 
                         if (academicCheck === true) {
